@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="TaoTie" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2012-10.1.8">
+  <Role name="Task">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=taotie;AccountKey=cA2QpkcF0i5JJ2tXVlFrPOsw+cDxj/NsNq3x00tZ7HLCicUewgcXxY0Q1gY34A+sgNcXa8BJdr8ONZMnfwKfnA==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="TaoTie" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBlQYJKoZIhvcNAQcDoIIBhjCCAYICAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEDE4v6WBHbqZQFBLNTDG/GQwDQYJKoZIhvcNAQEBBQAEggEAQDedAz5wH9CHv4pII+6tICQDnYtSrsWR5PjWq16dL6lUU6URrHGDni4UjIkKLelJAtXJIdD9L04Uz6aKaOOWK8oIKB4hVF2Yz0bhS0ODlVf1RgxWm+h9tbjoRXKMLN9RA76OXuj2iBz1CS3FGNiKmfs3aJ3SyNPJzIYmcCr9b0kPfb2si6PTWawB5NDAhavIeI/8Fh6dU69EVwBIsu4qLf+oMXgbiGB0DMw7DPc0W4zyE+EijA8+iT5p+lI9L1YohxWbCVnkvnVPFy00DcnC+ZHPmwibiE7Ypoaih3gfT2OBd8TcJPP1fymfwD4taYH6Wd6YLkQdzQoPfHNbacaZGzArBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECNNTZshk2nzhgAgsoFJ7K6D6qg==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2014-11-08T23:59:59.0000000+08:00" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="04BBFF80FAAAAB3D4DDC8257F89B44CD3D9BFACD" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+</ServiceConfiguration>
