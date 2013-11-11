@@ -199,6 +199,8 @@ namespace Task
 
         public ActorAssignment() { }
 
+        public string Name { get; set; }
+
         public string Topology { get; set; }
 
         public string InQueue { get; set; }

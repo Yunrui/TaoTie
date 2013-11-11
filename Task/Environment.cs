@@ -25,6 +25,8 @@ namespace Task
             // Create the CloudTable object that represents the "people" table.
             CloudTable table = tableClient.GetTableReference("topology");
 
+            table.CreateIfNotExists();
+
             return table;
         }
 
@@ -34,7 +36,6 @@ namespace Task
             if (RoleEnvironment.IsEmulated)
             {
                 CloudTable table = Environment.GetTopologyTable();
-                table.CreateIfNotExists();
 
                 string inqueueId = Guid.NewGuid().ToString();
                 string outqueueId = Guid.NewGuid().ToString();
@@ -42,18 +43,14 @@ namespace Task
                 ActorAssignment entity = new ActorAssignment(actor.Id)
                 {
                     Topology = "TestTopology",
+                    Name = "WordReadSpout",
+                    IsSpout = true,
                     InQueue = inqueueId,
                     OutQueue = outqueueId,
                 };
 
                 TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
                 table.Execute(insertOperation);
-
-                CloudQueue inqueue = Environment.GetQueue(inqueueId);
-                inqueue.CreateIfNotExists();
-
-                CloudQueue outqueue = Environment.GetQueue(outqueueId);
-                outqueue.CreateIfNotExists();
             }
         }
 
@@ -64,6 +61,8 @@ namespace Task
             CloudQueueClient client = storageAccount.CreateCloudQueueClient();
 
             CloudQueue queue = client.GetQueueReference(name);
+
+            queue.CreateIfNotExists();
 
             return queue;
         }

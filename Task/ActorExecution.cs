@@ -45,18 +45,39 @@ namespace Task
             container.ComposeParts(this);
 
             // Find right Actor based on assignment
-            if (assignment.IsSpout)
+            if (this.assignment.IsSpout)
             {
+                var spout = this.spouts.Where(c => c.GetType().Name == this.assignment.Name).FirstOrDefault() as ISpout;
+
+                if (spout == null)
+                {
+                    // DLL is not dropped correctly, just error out
+                    throw new InvalidOperationException(string.Format("Spout {0} cannot be loaded.", this.assignment.Name));
+                }
+
+                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueue);
+                spout.Open(emitter);
+                do
+                {
+                    spout.Execute();
+
+                    // $NOTE: whether it's too frequent to update this field?
+                    this.actor.HeartBeat = DateTime.UtcNow;
+
+                    // Release thread so that the other methods have a chance to be called
+                    System.Threading.Thread.Sleep(1);
+                }
+                while (true);
             }
             else
             {
             }
             
 
-            /*
-            CloudQueue queue = Environment.GetQueue(this.assignment.InQueue);
+            
+            CloudQueue queue = Environment.GetQueue(this.assignment.OutQueue);
             CloudQueueMessage message = queue.GetMessage();
-             * */
+             
         }
     }
 }
