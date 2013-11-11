@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage.Queue;
+using System.ComponentModel.Composition;
 
 namespace Task
 {
@@ -48,6 +50,7 @@ namespace Task
     {
         /// <summary>
         /// We need a thread-safe Dictionary here
+        /// or we have to make sure only one thread can modify this dictionary
         /// </summary>
         private Dictionary<Guid, Actor> actors = new Dictionary<Guid, Actor>();
 
@@ -92,9 +95,9 @@ namespace Task
         // The thread procedure performs the independent task
         static void ThreadProc(Object stateInfo)
         {
+            ActorAssignment assignment = null;
             Actor actor = (Actor)stateInfo;
 
-            // $TODO: easy instrumentation framework
             Trace.TraceInformation("Deployment {0} Actor {1} is Initialized.", actor.DeploymentId, actor.Id);
             
             while (true)
@@ -106,17 +109,14 @@ namespace Task
                     // Needs to contact central to get new assignment
 
                     // if there is an assignment then
-                    if (GetAssignment(actor) != null)
+                    assignment = GetAssignment(actor);
+                    if (assignment != null)
                     {
                         actor.State = ActorState.Working;
-                        actor.HeartBeat = DateTime.UtcNow;
-
                         SceneLogger.Current.Log("Get Assignment and switch State to Working.");
                     }
                     else
                     {
-                        actor.HeartBeat = DateTime.UtcNow;
-
                         SceneLogger.Current.Log("Waiting for assignment.");
 
                         // Let's check assignment 10 seconds later
@@ -125,60 +125,42 @@ namespace Task
                 }
                 else if (actor.State == ActorState.Working)
                 {
-                    SceneLogger.Current.Log("Working on the assignment");
-
-                    // Let's check assignment 10 seconds later
-                    Thread.Sleep(10000);
+                    SceneLogger.Current.Log("Working on the assignment");                
+                   
+                    try
+                    {
+                        (new ActorExecution(actor, assignment)).Run();
+                    }
+                    catch(Exception e)
+                    {
+                        actor.State = ActorState.Error;
+                        SceneLogger.Current.Log("Failed to execute topology:" + e.Message);
+                    }
                 }
                 else if (actor.State == ActorState.Error)
                 {
                     SceneLogger.Current.Log("The Actor is shutdown due to Error State.");
                     break;
                 }
+
+                actor.HeartBeat = DateTime.UtcNow;
             }
         }
 
-        static ActorEntity GetAssignment(Actor actor)
+        static ActorAssignment GetAssignment(Actor actor)
         {
-            ActorEntity actorEntity = null;
+            ActorAssignment actorEntity = null;
 
             try
             {
-                Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = null;
+                // Create the CloudTable object that represents the "topology" table.
+                CloudTable table = Environment.GetTopologyTable();
 
-                if (RoleEnvironment.IsEmulated)
-                {
-                    storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.DevelopmentStorageAccount;
-                }
-                else
-                {
-                    // Retrieve the storage account from the connection string.
-                    storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"));
-                }
-
-                // Create the table client.
-                CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-                // Create the CloudTable object that represents the "people" table.
-                CloudTable table = tableClient.GetTableReference("topology");
-
-                // $TEST: This code for testing environment only
-                // $TODO: consider to move it to a separate place
-                if (RoleEnvironment.IsEmulated)
-                {
-                    table.CreateIfNotExists();
-
-                    ActorEntity entity = new ActorEntity(actor.Id)
-                    {
-                        Topology = "TestTopology"
-                    };
-
-                    TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-                    table.Execute(insertOperation);
-                }
+                // $TEST: prepare test data so that the code can be executed in Azure Emulator
+                Environment.PrepareTestData(actor);
 
                 // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<ActorEntity>(ActorEntity.Key, actor.Id.ToString());
+                TableOperation retrieveOperation = TableOperation.Retrieve<ActorAssignment>(ActorAssignment.Key, actor.Id.ToString());
 
                 // Execute the retrieve operation.
                 TableResult retrievedResult = table.Execute(retrieveOperation);
@@ -186,13 +168,13 @@ namespace Task
                 // Get Assignment
                 if (retrievedResult.Result != null)
                 {
-                    actorEntity = (ActorEntity)retrievedResult.Result;
+                    actorEntity = (ActorAssignment)retrievedResult.Result;
                     SceneLogger.Current.Log(string.Format("Get {0} Assignment from topology {1}, ", actorEntity.IsSpout ? "Spout" : "Bolt", actorEntity.Topology));
                 }
             }
             catch (Exception e)
             {
-                SceneLogger.Current.Log(e.Message);
+                SceneLogger.Current.Log("Failed to get assignment:" + e.Message);
             }
 
             return actorEntity;
@@ -202,20 +184,20 @@ namespace Task
     /// <summary>
     /// ActorEntity
     /// </summary>
-    public class ActorEntity : TableEntity
+    public class ActorAssignment : TableEntity
     {
         /// <summary>
         /// Suppose Topology Table is pretty small, so it's not necessary to Partition
         /// </summary>
         public const string Key = "Actor";
 
-        public ActorEntity(Guid actorId)
+        public ActorAssignment(Guid actorId)
         {
-            this.PartitionKey = ActorEntity.Key;
+            this.PartitionKey = ActorAssignment.Key;
             this.RowKey = actorId.ToString();
         }
 
-        public ActorEntity() { }
+        public ActorAssignment() { }
 
         public string Topology { get; set; }
 
