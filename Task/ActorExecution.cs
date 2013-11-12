@@ -55,7 +55,7 @@ namespace Task
                     throw new InvalidOperationException(string.Format("Spout {0} cannot be loaded.", this.assignment.Name));
                 }
 
-                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueue);
+                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode);
                 spout.Open(emitter);
                 do
                 {
@@ -81,7 +81,7 @@ namespace Task
                     throw new InvalidOperationException(string.Format("Bolt {0} cannot be loaded.", this.assignment.Name));
                 }
 
-                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueue);
+                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode);
                 bolt.Open(emitter);
                 do
                 {

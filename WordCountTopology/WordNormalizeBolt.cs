@@ -16,14 +16,9 @@ namespace WordCountTopology
     {
         private IEmitter emitter;
 
-        public void Open(IEmitter emitter)
-        {
-            this.emitter = emitter;
-        }
-
         public void Execute(string tuple)
         {
-            if (string.IsNullOrWhiteSpace(tuple)) 
+            if (string.IsNullOrWhiteSpace(tuple))
             {
                 return;
             }
@@ -34,6 +29,11 @@ namespace WordCountTopology
             {
                 this.emitter.Emit(word);
             }
+        }
+
+        public void Open(IEmitter emitter)
+        {
+            this.emitter = emitter;
         }
     }
 }

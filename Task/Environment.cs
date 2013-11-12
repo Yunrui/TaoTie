@@ -75,7 +75,8 @@ namespace Task
                         Name = "WordReadSpout",
                         IsSpout = true,
                         InQueue = string.Empty,
-                        OutQueue = "spoutoutput",
+                        OutQueues = "spoutoutput1,spoutoutput2",
+                        SchemaGroupingMode = "ShuffleGrouping",
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -83,8 +84,19 @@ namespace Task
                         Topology = "TestTopology",
                         Name = "WordNormalizeBolt",
                         IsSpout = false,
-                        InQueue = "spoutoutput",
-                        OutQueue = "wnboltoutput",
+                        InQueue = "spoutoutput1",
+                        OutQueues = "wnboltoutput1,wnboltoutput2",
+                        SchemaGroupingMode = "FieldGrouping",
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "TestTopology",
+                        Name = "WordNormalizeBolt",
+                        IsSpout = false,
+                        InQueue = "spoutoutput2",
+                        OutQueues = "wnboltoutput1,wnboltoutput2",
+                        SchemaGroupingMode = "FieldGrouping",
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -92,8 +104,17 @@ namespace Task
                         Topology = "TestTopology",
                         Name = "WordCountBolt",
                         IsSpout = false,
-                        InQueue = "wnboltoutput",
-                        OutQueue = string.Empty,
+                        InQueue = "wnboltoutput1",
+                        OutQueues = null,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "TestTopology",
+                        Name = "WordCountBolt",
+                        IsSpout = false,
+                        InQueue = "wnboltoutput2",
+                        OutQueues = null,
                     },
         };
 

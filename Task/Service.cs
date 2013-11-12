@@ -57,7 +57,7 @@ namespace Task
         /// <summary>
         /// How many Tasks (Spout/Bolt) in a Service Role
         /// </summary>
-        private const int ConcurrentTask = 3;
+        private const int ConcurrentTask = 5;
 
         /// <summary>
         /// ctor
@@ -179,34 +179,5 @@ namespace Task
 
             return actorEntity;
         }
-    }
-
-    /// <summary>
-    /// ActorEntity
-    /// </summary>
-    public class ActorAssignment : TableEntity
-    {
-        /// <summary>
-        /// Suppose Topology Table is pretty small, so it's not necessary to Partition
-        /// </summary>
-        public const string Key = "Actor";
-
-        public ActorAssignment(Guid actorId)
-        {
-            this.PartitionKey = ActorAssignment.Key;
-            this.RowKey = actorId.ToString();
-        }
-
-        public ActorAssignment() { }
-
-        public string Name { get; set; }
-
-        public string Topology { get; set; }
-
-        public string InQueue { get; set; }
-
-        public string OutQueue { get; set; }
-
-        public bool IsSpout { get; set; }
     }
 }

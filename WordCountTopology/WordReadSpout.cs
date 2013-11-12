@@ -23,17 +23,17 @@ namespace WordCountTopology
             "the other is to do word count",
         };
 
-        public void Open(IEmitter emitter)
-        {
-            this.emitter = emitter;
-        }
-
         public void Execute()
         {
             // The basic pattern is to access data source outside
             // and emit a bunch of tuple then return
             Random random = new Random();
             this.emitter.Emit(this.sentences[random.Next(4)]);
+        }
+
+        public void Open(IEmitter emitter)
+        {
+            this.emitter = emitter;
         }
     }
 }

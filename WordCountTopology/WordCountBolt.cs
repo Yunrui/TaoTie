@@ -15,11 +15,6 @@ namespace WordCountTopology
         private IEmitter emitter;
         private Dictionary<string, int> wordsCount = new Dictionary<string, int>();
 
-        public void Open(IEmitter emitter)
-        {
-            this.emitter = emitter;
-        }
-
         public void Execute(string tuple)
         {
             if (string.IsNullOrWhiteSpace(tuple))
@@ -37,6 +32,11 @@ namespace WordCountTopology
             }
 
             Trace.TraceInformation("{0} : {1}", tuple, wordsCount[tuple]);
+        }
+
+        public void Open(IEmitter emitter)
+        {
+            this.emitter = emitter;
         }
     }
 }
