@@ -25,7 +25,7 @@ namespace WordCountTopology
                 return;
             }
 
-            var parts = value.Split(new char[] { ' ' });
+            var parts = value.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string word in parts)
             {
@@ -36,6 +36,11 @@ namespace WordCountTopology
         public void Open(IEmitter emitter)
         {
             this.emitter = emitter;
+        }
+
+        public IList<string> DeclareOutputFields()
+        {
+            return new List<string>() { "word" };
         }
     }
 }

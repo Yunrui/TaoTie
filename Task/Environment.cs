@@ -87,6 +87,7 @@ namespace Task
                         InQueue = "spoutoutput1",
                         OutQueues = "wnboltoutput1,wnboltoutput2",
                         SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "word",
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -97,6 +98,7 @@ namespace Task
                         InQueue = "spoutoutput2",
                         OutQueues = "wnboltoutput1,wnboltoutput2",
                         SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "word",
                     },
 
             new ActorAssignment(Guid.Empty)

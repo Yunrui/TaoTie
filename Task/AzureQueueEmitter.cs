@@ -8,27 +8,51 @@ using System.Threading.Tasks;
 
 namespace Task
 {
+    /// <summary>
+    /// Azure Queue Emitter
+    /// </summary>
+    /// <remarks>
+    /// How AzureQueue compares with ZeroMQ? 
+    /// </remarks>
     class AzureQueueEmitter : IEmitter
     {
         private List<CloudQueue> queues = new List<CloudQueue>();
         private string schemaGroupingMode = string.Empty;
+        private string groupingField = string.Empty;
+        private IList<string> declaredFields = null;
 
-        public AzureQueueEmitter(string outQueues, string schemaGroupingMode)
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="outQueues"></param>
+        /// <param name="schemaGroupingMode"></param>
+        /// <param name="groupingField"></param>
+        public AzureQueueEmitter(string outQueues, string schemaGroupingMode, string groupingField, IList<string> declaredFields)
         {
-            this.schemaGroupingMode = schemaGroupingMode;
+            this.groupingField = groupingField;
+            this.declaredFields = declaredFields;
 
-            var parts = outQueues.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (parts != null && parts.Length != 0)
+            if (!string.IsNullOrEmpty(outQueues))
             {
-                foreach (string queue in parts)
+                this.schemaGroupingMode = schemaGroupingMode;
+
+                var parts = outQueues.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts != null && parts.Length != 0)
                 {
-                    this.queues.Add(Environment.GetQueue(queue));
+                    foreach (string queue in parts)
+                    {
+                        this.queues.Add(Environment.GetQueue(queue));
+                    }
                 }
             }
         }
 
-        public void Emit(PrimitiveInterface.Tuple value)
+        /// <summary>
+        /// Emit
+        /// </summary>
+        /// <param name="tuple"></param>
+        public void Emit(PrimitiveInterface.Tuple tuple)
         {
             if (this.queues.Count == 0)
             {
@@ -42,18 +66,29 @@ namespace Task
             {
                 case "ShuffleGrouping":
                     index = random.Next(this.queues.Count);
-                    this.queues[index].AddMessage(new CloudQueueMessage(value));
+                    this.queues[index].AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
                     break;
+
                 case "FieldGrouping":
-                    index = Math.Abs(value.GetHashCode()) % this.queues.Count;
-                    this.queues[index].AddMessage(new CloudQueueMessage(value));
+
+                    if (string.IsNullOrEmpty(this.groupingField) || this.declaredFields == null || this.declaredFields.Count == 0)
+                    {
+                        throw new InvalidOperationException("You must both specify GroupingField and declare Schema for FieldGrouping.");
+                    }
+
+                    var distributeField = tuple.Get(this.declaredFields.IndexOf(this.groupingField));
+
+                    index = Math.Abs(distributeField.GetHashCode()) % this.queues.Count;
+                    this.queues[index].AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
                     break;
+
                 case "AllGrouping":
                     foreach (CloudQueue queue in this.queues)
                     {
-                        queue.AddMessage(new CloudQueueMessage(value));
+                        queue.AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
                     }
                     break;
+
                 default:
                     break;
             };

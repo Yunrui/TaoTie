@@ -16,11 +16,13 @@ namespace PrimitiveInterface
     {
         void Open(IEmitter emitter);
         void Execute();
+        IList<string> DeclareOutputFields();
     }
 
     public interface IBolt
     {
         void Open(IEmitter emitter);
         void Execute(Tuple tuple);
+        IList<string> DeclareOutputFields();
     }
 }

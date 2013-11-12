@@ -55,7 +55,7 @@ namespace Task
                     throw new InvalidOperationException(string.Format("Spout {0} cannot be loaded.", this.assignment.Name));
                 }
 
-                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode);
+                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, spout.DeclareOutputFields());
                 spout.Open(emitter);
                 do
                 {
@@ -81,7 +81,7 @@ namespace Task
                     throw new InvalidOperationException(string.Format("Bolt {0} cannot be loaded.", this.assignment.Name));
                 }
 
-                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode);
+                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, bolt.DeclareOutputFields());
                 bolt.Open(emitter);
                 do
                 {
@@ -91,14 +91,14 @@ namespace Task
                     {
                         // Release thread so that the other methods have a chance to be called
                         System.Threading.Thread.Sleep(1);
+                        continue;
                     }
 
                     // $TODO: need to convert from message to Tuple
-                    bolt.Execute(new PrimitiveInterface.Tuple(message.AsString));
+                    bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsBytes));
                 }
                 while (true);
             }
-             
         }
     }
 }

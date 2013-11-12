@@ -35,6 +35,8 @@ namespace Task
 
         public string SchemaGroupingMode { get; set; }
 
+        public string GroupingField { get; set; }
+
         public bool IsSpout { get; set; }
     }
 }

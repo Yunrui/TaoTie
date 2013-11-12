@@ -35,5 +35,10 @@ namespace WordCountTopology
         {
             this.emitter = emitter;
         }
+
+        public IList<string> DeclareOutputFields()
+        {
+            return new List<string>() { "line" };
+        }
     }
 }
