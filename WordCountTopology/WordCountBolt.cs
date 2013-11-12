@@ -2,19 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace WordCountTopology
 {
-    /// <summary>
-    /// This is an example for TaoTie, make sure copy dll manually to approot
-    /// </summary>
     [Export(typeof(IBolt))]
-    class WordNormalizeBolt : IBolt
+    class WordCountBolt : IBolt
     {
         private IEmitter emitter;
+        private Dictionary<string, int> wordsCount = new Dictionary<string, int>();
 
         public void Open(IEmitter emitter)
         {
@@ -23,17 +22,21 @@ namespace WordCountTopology
 
         public void Execute(string tuple)
         {
-            if (string.IsNullOrWhiteSpace(tuple)) 
+            if (string.IsNullOrWhiteSpace(tuple))
             {
                 return;
             }
 
-            var parts = tuple.Split(new char[] { ' ' });
-
-            foreach (string word in parts)
+            if (wordsCount.ContainsKey(tuple))
             {
-                this.emitter.Emit(word);
+                wordsCount[tuple]++;
             }
+            else
+            {
+                wordsCount[tuple] = 1;
+            }
+
+            Trace.TraceInformation("{0} : {1}", tuple, wordsCount[tuple]);
         }
     }
 }

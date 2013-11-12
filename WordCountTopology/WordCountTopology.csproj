@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WordCountBolt.cs" />
     <Compile Include="WordNormalizeBolt.cs" />
     <Compile Include="WordReadSpout.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

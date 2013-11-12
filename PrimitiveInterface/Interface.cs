@@ -14,12 +14,13 @@ namespace PrimitiveInterface
 
     public interface ISpout
     {
-        void Open(IEmitter collector);
+        void Open(IEmitter emitter);
         void Execute();
     }
 
     public interface IBolt
     {
+        void Open(IEmitter emitter);
         void Execute(string tuple);
     }
 }

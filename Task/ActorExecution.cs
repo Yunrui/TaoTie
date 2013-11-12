@@ -71,12 +71,32 @@ namespace Task
             }
             else
             {
-            }
-            
+                CloudQueue inQueue = Environment.GetQueue(this.assignment.InQueue);
 
-            
-            CloudQueue queue = Environment.GetQueue(this.assignment.OutQueue);
-            CloudQueueMessage message = queue.GetMessage();
+                var bolt = this.bolts.Where(c => c.GetType().Name == this.assignment.Name).FirstOrDefault() as IBolt;
+
+                if (bolt == null)
+                {
+                    // DLL is not dropped correctly, just error out
+                    throw new InvalidOperationException(string.Format("Bolt {0} cannot be loaded.", this.assignment.Name));
+                }
+
+                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueue);
+                bolt.Open(emitter);
+                do
+                {
+                    CloudQueueMessage message = inQueue.GetMessage();
+
+                    if (message == null)
+                    {
+                        // Release thread so that the other methods have a chance to be called
+                        System.Threading.Thread.Sleep(1);
+                    }
+
+                    bolt.Execute(message.AsString);
+                }
+                while (true);
+            }
              
         }
     }

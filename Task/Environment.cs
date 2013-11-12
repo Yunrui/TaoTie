@@ -30,30 +30,6 @@ namespace Task
             return table;
         }
 
-        public static void PrepareTestData(Actor actor)
-        {
-            // $TEST: This code for testing environment only
-            if (RoleEnvironment.IsEmulated)
-            {
-                CloudTable table = Environment.GetTopologyTable();
-
-                string inqueueId = Guid.NewGuid().ToString();
-                string outqueueId = Guid.NewGuid().ToString();
-
-                ActorAssignment entity = new ActorAssignment(actor.Id)
-                {
-                    Topology = "TestTopology",
-                    Name = "WordReadSpout",
-                    IsSpout = true,
-                    InQueue = inqueueId,
-                    OutQueue = outqueueId,
-                };
-
-                TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-                table.Execute(insertOperation);
-            }
-        }
-
         public static CloudQueue GetQueue(string name)
         {
             Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = GetStorageAccount();
@@ -86,5 +62,55 @@ namespace Task
             }
             return storageAccount;
         }
+
+        #region Prepare Test Data
+
+        private static int ActorStep = 0;
+
+        private static List<ActorAssignment> assignments = new List<ActorAssignment>()
+        {
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "TestTopology",
+                        Name = "WordReadSpout",
+                        IsSpout = true,
+                        InQueue = string.Empty,
+                        OutQueue = "spoutoutput",
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "TestTopology",
+                        Name = "WordNormalizeBolt",
+                        IsSpout = false,
+                        InQueue = "spoutoutput",
+                        OutQueue = "wnboltoutput",
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "TestTopology",
+                        Name = "WordCountBolt",
+                        IsSpout = false,
+                        InQueue = "wnboltoutput",
+                        OutQueue = string.Empty,
+                    },
+        };
+
+        public static void PrepareTestData(Actor actor)
+        {
+            // $TEST: This code for testing environment only
+            if (RoleEnvironment.IsEmulated)
+            {
+                CloudTable table = Environment.GetTopologyTable();
+                ActorAssignment entity = assignments[ActorStep++];
+
+                entity.RowKey = actor.Id.ToString();
+
+                TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                table.Execute(insertOperation);
+            }
+        }
+        #endregion
     }
 }

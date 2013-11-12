@@ -14,7 +14,10 @@ namespace Task
 
         public AzureQueueEmitter(string outQueue)
         {
-            this.queue = Environment.GetQueue(outQueue);
+            if (!string.IsNullOrWhiteSpace(outQueue))
+            {
+                this.queue = Environment.GetQueue(outQueue);
+            }
         }
 
         public void Emit(string value)
