@@ -93,7 +93,8 @@ namespace Task
                         System.Threading.Thread.Sleep(1);
                     }
 
-                    bolt.Execute(message.AsString);
+                    // $TODO: need to convert from message to Tuple
+                    bolt.Execute(new PrimitiveInterface.Tuple(message.AsString));
                 }
                 while (true);
             }

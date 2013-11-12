@@ -15,23 +15,25 @@ namespace WordCountTopology
         private IEmitter emitter;
         private Dictionary<string, int> wordsCount = new Dictionary<string, int>();
 
-        public void Execute(string tuple)
+        public void Execute(PrimitiveInterface.Tuple tuple)
         {
-            if (string.IsNullOrWhiteSpace(tuple))
+            string value = tuple.Get(0) as string;
+
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return;
             }
 
-            if (wordsCount.ContainsKey(tuple))
+            if (wordsCount.ContainsKey(value))
             {
-                wordsCount[tuple]++;
+                wordsCount[value]++;
             }
             else
             {
-                wordsCount[tuple] = 1;
+                wordsCount[value] = 1;
             }
 
-            Trace.TraceInformation("{0} : {1}", tuple, wordsCount[tuple]);
+            Trace.TraceInformation("{0} : {1}", tuple, wordsCount[value]);
         }
 
         public void Open(IEmitter emitter)

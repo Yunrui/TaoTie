@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActorAssignment.cs" />
-    <Compile Include="Emitter.cs" />
+    <Compile Include="AzureQueueEmitter.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="SceneLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

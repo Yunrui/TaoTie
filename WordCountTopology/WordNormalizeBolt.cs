@@ -16,18 +16,20 @@ namespace WordCountTopology
     {
         private IEmitter emitter;
 
-        public void Execute(string tuple)
+        public void Execute(PrimitiveInterface.Tuple tuple)
         {
-            if (string.IsNullOrWhiteSpace(tuple))
+            string value = tuple.Get(0) as string;
+
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return;
             }
 
-            var parts = tuple.Split(new char[] { ' ' });
+            var parts = value.Split(new char[] { ' ' });
 
             foreach (string word in parts)
             {
-                this.emitter.Emit(word);
+                this.emitter.Emit(new PrimitiveInterface.Tuple(word));
             }
         }
 

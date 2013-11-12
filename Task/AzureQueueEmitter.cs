@@ -28,7 +28,7 @@ namespace Task
             }
         }
 
-        public void Emit(string value)
+        public void Emit(PrimitiveInterface.Tuple value)
         {
             if (this.queues.Count == 0)
             {

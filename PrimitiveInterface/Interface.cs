@@ -9,7 +9,7 @@ namespace PrimitiveInterface
     public interface IEmitter
     {
         // $TODO: we need strong typed value system
-        void Emit(string value);
+        void Emit(Tuple value);
     }
 
     public interface ISpout
@@ -21,6 +21,6 @@ namespace PrimitiveInterface
     public interface IBolt
     {
         void Open(IEmitter emitter);
-        void Execute(string tuple);
+        void Execute(Tuple tuple);
     }
 }
