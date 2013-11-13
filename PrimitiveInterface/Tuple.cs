@@ -15,13 +15,18 @@ namespace PrimitiveInterface
     [Serializable]
     public class Tuple
     {
-        private IList<object> values = new List<object>();
+        /// <summary>
+        /// We just simply using this delimiter to separrate value in the dictionary
+        /// $TODO: we need to find an elegant way later
+        /// </summary>
+        private const string delimiter = "____";
+        private IList<string> values = new List<string>();
 
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="values"></param>
-        public Tuple(IList<object> values)
+        public Tuple(IList<string> values)
         {
             this.values = values;
         }
@@ -30,7 +35,7 @@ namespace PrimitiveInterface
         /// ctor
         /// </summary>
         /// <param name="value"></param>
-        public Tuple(object value)
+        public Tuple(string value)
         {
             this.values.Add(value);
         }
@@ -41,26 +46,20 @@ namespace PrimitiveInterface
         }
 
         /// <summary>
-        /// $TODO: what's performance penalty for this? 
+        /// The first version used BinaryFormatter, the performance penalty is unacceptable.
+        /// So I switch back to only support string type and write simple formatter
         /// </summary>
         /// <returns></returns>
-        public byte[] GetSeriliableContent()
+        public string GetSeriliableContent()
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                IFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stream, this);
-                return stream.GetBuffer();
-            }
+            return string.Join(Tuple.delimiter, this.values.ToArray());
         }
 
-        public static Tuple Parse(byte[] content)
+        public static Tuple Parse(string message)
         {
-            using (MemoryStream stream = new MemoryStream(content))
-            {
-                IFormatter formatter = new BinaryFormatter();
-                return formatter.Deserialize(stream) as Tuple;
-            }
+            var parts = message.Split(new string[] { Tuple.delimiter }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new Tuple(parts.ToList());
         }
     }
 }

@@ -27,11 +27,16 @@ namespace WordCountTopology
         {
             // The basic pattern is to access data source outside
             // and emit a bunch of tuple then return
+
             Random random = new Random();
-            this.emitter.Emit(new PrimitiveInterface.Tuple(this.sentences[random.Next(4)]));
+
+            for (int i = 0; i < 1000; i++)
+            {
+                this.emitter.Emit(new PrimitiveInterface.Tuple(this.sentences[random.Next(4)]));
+            }
         }
 
-        public void Open(IEmitter emitter)
+        public void Open(IEmitter emitter, TopologyContext context)
         {
             this.emitter = emitter;
         }

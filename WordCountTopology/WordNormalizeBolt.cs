@@ -33,7 +33,7 @@ namespace WordCountTopology
             }
         }
 
-        public void Open(IEmitter emitter)
+        public void Open(IEmitter emitter, TopologyContext context)
         {
             this.emitter = emitter;
         }

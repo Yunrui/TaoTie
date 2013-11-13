@@ -15,15 +15,14 @@ namespace Task
     /// </summary>
     class Environment
     {
-        public static CloudTable GetTopologyTable()
+        public static CloudTable GetTable(string name)
         {
             Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = GetStorageAccount();
 
             // Create the table client.
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
 
-            // Create the CloudTable object that represents the "people" table.
-            CloudTable table = tableClient.GetTableReference("topology");
+            CloudTable table = tableClient.GetTableReference(name);
 
             table.CreateIfNotExists();
 
@@ -125,7 +124,7 @@ namespace Task
             // $TEST: This code for testing environment only
             if (RoleEnvironment.IsEmulated)
             {
-                CloudTable table = Environment.GetTopologyTable();
+                CloudTable table = Environment.GetTable("topology");
                 ActorAssignment entity = assignments[ActorStep++];
 
                 entity.RowKey = actor.Id.ToString();

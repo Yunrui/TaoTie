@@ -102,7 +102,7 @@ namespace Task
             
             while (true)
             {
-                SceneLogger.Current.SetSceneId(actor);
+                RoundLogger.Current.SetSceneId(actor);
                 
                 if (actor.State == ActorState.NewBorn)
                 {
@@ -113,11 +113,11 @@ namespace Task
                     if (assignment != null)
                     {
                         actor.State = ActorState.Working;
-                        SceneLogger.Current.Log("Get Assignment and switch State to Working.");
+                        RoundLogger.Current.Log("Get Assignment and switch State to Working.");
                     }
                     else
                     {
-                        SceneLogger.Current.Log("Waiting for assignment.");
+                        RoundLogger.Current.Log("Waiting for assignment.");
 
                         // Let's check assignment 10 seconds later
                         Thread.Sleep(10000);
@@ -125,7 +125,7 @@ namespace Task
                 }
                 else if (actor.State == ActorState.Working)
                 {
-                    SceneLogger.Current.Log("Working on the assignment");                
+                    RoundLogger.Current.Log("Working on the assignment");                
                    
                     try
                     {
@@ -134,12 +134,13 @@ namespace Task
                     catch(Exception e)
                     {
                         actor.State = ActorState.Error;
-                        SceneLogger.Current.Log("Failed to execute topology:" + e.Message);
+                        RoundLogger.Current.Log("Failed to execute topology:" + e.Message);
+                        RoundLogger.Current.Log(e.StackTrace);
                     }
                 }
                 else if (actor.State == ActorState.Error)
                 {
-                    SceneLogger.Current.Log("The Actor is shutdown due to Error State.");
+                    RoundLogger.Current.Log("The Actor is shutdown due to Error State.");
                     break;
                 }
 
@@ -154,7 +155,7 @@ namespace Task
             try
             {
                 // Create the CloudTable object that represents the "topology" table.
-                CloudTable table = Environment.GetTopologyTable();
+                CloudTable table = Environment.GetTable("topology");
 
                 // $TEST: prepare test data so that the code can be executed in Azure Emulator
                 Environment.PrepareTestData(actor);
@@ -169,12 +170,13 @@ namespace Task
                 if (retrievedResult.Result != null)
                 {
                     actorEntity = (ActorAssignment)retrievedResult.Result;
-                    SceneLogger.Current.Log(string.Format("Get {0} Assignment from topology {1}, ", actorEntity.IsSpout ? "Spout" : "Bolt", actorEntity.Topology));
+                    RoundLogger.Current.Log(string.Format("Get {0} Assignment from topology {1}, ", actorEntity.IsSpout ? "Spout" : "Bolt", actorEntity.Topology));
                 }
             }
             catch (Exception e)
             {
-                SceneLogger.Current.Log("Failed to get assignment:" + e.Message);
+                RoundLogger.Current.Log("Failed to get assignment:" + e.Message);
+                RoundLogger.Current.Log(e.StackTrace);
             }
 
             return actorEntity;

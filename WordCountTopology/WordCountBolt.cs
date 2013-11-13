@@ -1,4 +1,7 @@
-﻿using PrimitiveInterface;
+﻿using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage.Table;
+using PrimitiveInterface;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -14,11 +17,22 @@ namespace WordCountTopology
     {
         private IEmitter emitter;
         private Dictionary<string, int> wordsCount = new Dictionary<string, int>();
+        private CloudTable table;
+        private TopologyContext context;
 
         private int name = 0;
         public WordCountBolt()
         {
             name = (new Random(DateTime.Now.Millisecond)).Next();
+
+            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = GetStorageAccount();
+
+            // Create the table client.
+            Microsoft.WindowsAzure.Storage.Table.CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+
+            this.table = tableClient.GetTableReference("wordcount");
+
+            this.table.CreateIfNotExists();
         }
 
         public void Execute(PrimitiveInterface.Tuple tuple)
@@ -39,17 +53,69 @@ namespace WordCountTopology
                 wordsCount[value] = 1;
             }
 
+            WordCountEntry entity = new WordCountEntry()  
+            {
+                Word = value,
+                Count = wordsCount[value],
+                Bolt = this.context.ActorId,
+                RowKey = value + "____"+ this.context.ActorId,
+            };
+
+            TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+            table.Execute(insertOperation);
+
             Trace.TraceInformation("{0} - {1} : {2}", this.name, value, wordsCount[value]);
         }
 
-        public void Open(IEmitter emitter)
+        public void Open(IEmitter emitter, TopologyContext context)
         {
             this.emitter = emitter;
+            this.context = context;
         }
 
         public IList<string> DeclareOutputFields()
         {
             return null;
         }
+
+        private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()
+        {
+            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = null;
+
+            if (RoleEnvironment.IsEmulated)
+            {
+                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.DevelopmentStorageAccount;
+            }
+            else
+            {
+                // Retrieve the storage account from the connection string.
+                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"));
+            }
+            return storageAccount;
+        }
+    }
+
+
+
+    /// <summary>
+    /// ActorEntity
+    /// </summary>
+    public class WordCountEntry : TableEntity
+    {
+        /// <summary>
+        /// Suppose Topology Table is pretty small, so it's not necessary to Partition
+        /// </summary>
+        public const string Key = "WordCount";
+
+        public WordCountEntry()
+        {
+            this.PartitionKey = WordCountEntry.Key;
+        }
+
+        public string Word { get; set; }
+
+        public int Count { get; set; }
+
+        public string Bolt { get; set; }
     }
 }

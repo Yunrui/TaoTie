@@ -14,14 +14,14 @@ namespace PrimitiveInterface
 
     public interface ISpout
     {
-        void Open(IEmitter emitter);
+        void Open(IEmitter emitter, TopologyContext context);
         void Execute();
         IList<string> DeclareOutputFields();
     }
 
     public interface IBolt
     {
-        void Open(IEmitter emitter);
+        void Open(IEmitter emitter, TopologyContext context);
         void Execute(Tuple tuple);
         IList<string> DeclareOutputFields();
     }

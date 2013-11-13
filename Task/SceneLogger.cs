@@ -13,10 +13,10 @@ namespace Task
     /// <remarks>
     /// This is correlation Id for this scene, every following log should use this id to correlate
     /// </remarks>
-    class SceneLogger
+    class RoundLogger
     {
         [ThreadStatic]
-        private static SceneLogger instance;
+        private static RoundLogger instance;
 
         /// <summary>
         /// SceneId
@@ -26,7 +26,7 @@ namespace Task
         /// <summary>
         /// ctor
         /// </summary>
-        protected SceneLogger()
+        protected RoundLogger()
         {
         }
 
@@ -45,16 +45,16 @@ namespace Task
             this.sceneId = string.Format("###{0}##{1}##{2}###", actor.DeploymentId, actor.Id, Guid.NewGuid());
         }
 
-        public static SceneLogger Current
+        public static RoundLogger Current
         {
             get
             {
-                if (SceneLogger.instance == null)
+                if (RoundLogger.instance == null)
                 {
-                    SceneLogger.instance = new SceneLogger();
+                    RoundLogger.instance = new RoundLogger();
                 }
 
-                return SceneLogger.instance;
+                return RoundLogger.instance;
             }
         }
     }

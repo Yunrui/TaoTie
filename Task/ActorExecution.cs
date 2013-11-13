@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Queue;
 using PrimitiveInterface;
+using System.Diagnostics;
 
 namespace Task
 {
@@ -32,6 +33,8 @@ namespace Task
 
         public void Run()
         {
+            Stopwatch watch = new Stopwatch();
+
             //An aggregate catalog that combines multiple catalogs
             var catalog = new AggregateCatalog();
             //Adds all the parts found in all assemblies in 
@@ -56,10 +59,14 @@ namespace Task
                 }
 
                 IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, spout.DeclareOutputFields());
-                spout.Open(emitter);
+                spout.Open(emitter, new TopologyContext() { ActorId = actor.Id.ToString(), });
                 do
                 {
+                    watch.Restart();
                     spout.Execute();
+                    watch.Stop();
+
+                    RoundLogger.Current.Log(string.Format("The Spout {0} takes {1} ms for this round.", assignment.Name, watch.ElapsedMilliseconds));
 
                     // $NOTE: whether it's too frequent to update this field?
                     this.actor.HeartBeat = DateTime.UtcNow;
@@ -82,20 +89,32 @@ namespace Task
                 }
 
                 IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, bolt.DeclareOutputFields());
-                bolt.Open(emitter);
+                bolt.Open(emitter, new TopologyContext() { ActorId = actor.Id.ToString(), });
                 do
                 {
-                    CloudQueueMessage message = inQueue.GetMessage();
+                    watch.Restart();
 
-                    if (message == null)
+                    // $TODO: is 100 right number?
+                    var messages = inQueue.GetMessages(10, TimeSpan.FromSeconds(30));
+
+                    foreach (var message in messages)
                     {
-                        // Release thread so that the other methods have a chance to be called
-                        System.Threading.Thread.Sleep(1);
-                        continue;
+                        if (message == null)
+                        {
+                            // Release thread so that the other methods have a chance to be called
+                            System.Threading.Thread.Sleep(1);
+                            continue;
+                        }
+
+                        // $TODO: need to convert from message to Tuple
+                        bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
+
+                        inQueue.DeleteMessage(message);
                     }
 
-                    // $TODO: need to convert from message to Tuple
-                    bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsBytes));
+                    watch.Stop();
+
+                    RoundLogger.Current.Log(string.Format("The Bolt {0} takes {1} ms for this round.", assignment.Name, watch.ElapsedMilliseconds));
                 }
                 while (true);
             }
