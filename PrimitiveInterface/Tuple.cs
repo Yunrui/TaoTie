@@ -17,6 +17,7 @@ namespace PrimitiveInterface
     {
         /// <summary>
         /// We just simply using this delimiter to separrate value in the dictionary
+        /// Serialization is too slow
         /// $TODO: we need to find an elegant way later
         /// </summary>
         private const string delimiter = "____";

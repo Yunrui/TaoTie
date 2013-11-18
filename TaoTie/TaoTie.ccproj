@@ -48,9 +48,18 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Profiles" />
+    <Folder Include="TaskContent\" />
   </ItemGroup>
   <ItemGroup>
     <PublishProfile Include="Profiles\TaoTieProduction.azurePubxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TaskContent\WordCountTopology.dll">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="TaskContent\WordCountTopology.pdb">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>

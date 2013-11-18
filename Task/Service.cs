@@ -129,6 +129,7 @@ namespace Task
                    
                     try
                     {
+                        // $TODO: need to fetch package for new assignment
                         (new ActorExecution(actor, assignment)).Run();
                     }
                     catch(Exception e)
