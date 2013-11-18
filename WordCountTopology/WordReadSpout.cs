@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PrimitiveInterface;
+using System.Diagnostics;
 
 namespace WordCountTopology
 {
