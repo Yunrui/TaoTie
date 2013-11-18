@@ -63,8 +63,6 @@ namespace WordCountTopology
 
             TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
             table.Execute(insertOperation);
-
-            Trace.TraceInformation("{0} - {1} : {2}", this.name, value, wordsCount[value]);
         }
 
         public void Open(IEmitter emitter, TopologyContext context)
