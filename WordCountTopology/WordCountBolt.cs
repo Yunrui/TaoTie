@@ -53,16 +53,20 @@ namespace WordCountTopology
                 wordsCount[value] = 1;
             }
 
-            WordCountEntry entity = new WordCountEntry()  
+            // Not necessary to update database for each entry
+            if (wordsCount[value] % 1000 == 0)
             {
-                Word = value,
-                Count = wordsCount[value],
-                Bolt = this.context.ActorId,
-                RowKey = value + "____"+ this.context.ActorId,
-            };
+                WordCountEntry entity = new WordCountEntry()
+                {
+                    Word = value,
+                    Count = wordsCount[value],
+                    Bolt = this.context.ActorId,
+                    RowKey = value + "____" + this.context.ActorId,
+                };
 
-            TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-            table.Execute(insertOperation);
+                TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                table.Execute(insertOperation);
+            }
         }
 
         public void Open(IEmitter emitter, TopologyContext context)
