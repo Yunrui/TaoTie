@@ -55,6 +55,11 @@ namespace Task
         private Dictionary<Guid, Actor> actors = new Dictionary<Guid, Actor>();
 
         /// <summary>
+        /// sync object
+        /// </summary>
+        private static object LockObject = new Object();
+
+        /// <summary>
         /// How many Tasks (Spout/Bolt) in a Service Role
         /// </summary>
         private const int ConcurrentTask = 5;
@@ -64,20 +69,26 @@ namespace Task
         /// </summary>
         internal Service()
         {
-            string deploymentId = RoleEnvironment.DeploymentId;
-
-            // Born #ConcurrentTask threads for Tasks
-            // and set state to NewBorn
-            for (int i = 0; i < Service.ConcurrentTask; i++)
+            lock (LockObject)
             {
-                // Each actors has its own Guid Identifier
-                Guid id = Guid.NewGuid();
-                Actor actor = new Actor() { State = ActorState.NewBorn, Id = id, DeploymentId = deploymentId, HeartBeat = DateTime.UtcNow };
-
-                ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadProc), actor);
-
-                this.actors[id] = actor;
+                // Born #ConcurrentTask threads for Tasks
+                // and set state to NewBorn
+                for (int i = 0; i < Service.ConcurrentTask; i++)
+                {
+                    ForkNewActor();
+                }
             }
+        }
+
+        private void ForkNewActor()
+        {
+            // Each actors has its own Guid Identifier
+            Guid id = Guid.NewGuid();
+            Actor actor = new Actor() { State = ActorState.NewBorn, Id = id, DeploymentId = RoleEnvironment.DeploymentId, HeartBeat = DateTime.UtcNow };
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadProc), actor);
+
+            this.actors[id] = actor;
         }
 
         /// <summary>
@@ -88,8 +99,66 @@ namespace Task
         /// </summary>
         internal void Run()
         {
-            // $TODO: Lots of ToDo here
-            Trace.TraceInformation("Service Maintain {0}", RoleEnvironment.DeploymentId);
+            do
+            {
+                Thread.Sleep(15000);
+
+                Trace.TraceInformation("Service Maintain {0}", RoleEnvironment.DeploymentId);
+
+                CloudTable table = Environment.GetTable("topology");
+
+                lock (LockObject)
+                {
+                    IList<Guid> errorActors = new List<Guid>();
+
+                    // Remove Actor which in Error State, and fork a new one
+                    foreach (Guid id in this.actors.Keys)
+                    {
+                        if (this.actors[id].State == ActorState.Error)
+                        {
+                            // Cannot modify this.actors in foreach
+                            errorActors.Add(id);
+                        }
+                        else
+                        {
+                            try
+                            {
+
+                                if (this.actors[id].State == ActorState.Working)
+                                {
+                                    var ass = GetAssignment(this.actors[id], false);
+
+                                    if (ass != null)
+                                    {
+                                        if (string.Equals("Kill", ass.Operation, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            // I didn't lock this Actor considering there is no state transition from Working to non Error.
+                                            this.actors[id].State = ActorState.Error;
+                                        }
+                                    }
+                                }
+
+                                ActorAssignment assignment = new ActorAssignment(id) { HeartBeat = this.actors[id].HeartBeat, State = this.actors[id].State.ToString(), };
+                                TableOperation mergeOperation = TableOperation.Merge(assignment);
+                                TableResult retrievedResult = table.Execute(mergeOperation);
+
+                                Trace.TraceInformation("Actor {0} updated HeartBeat", id);
+                            }
+                            catch (Exception e)
+                            {
+                                Trace.TraceInformation("Actor {0} failed to update HeartBeat due to {1}", id, e.Message);
+                            }
+                        }
+                    }
+
+                    foreach (Guid id in errorActors)
+                    {
+                        this.actors.Remove(id);
+                        this.ForkNewActor();
+                    }
+                }
+            }
+            while (true);
         }
 
         // The thread procedure performs the independent task
@@ -149,7 +218,7 @@ namespace Task
             }
         }
 
-        static ActorAssignment GetAssignment(Actor actor)
+        static ActorAssignment GetAssignment(Actor actor, bool prepareTestData = true)
         {
             ActorAssignment actorEntity = null;
 
@@ -159,7 +228,10 @@ namespace Task
                 CloudTable table = Environment.GetTable("topology");
 
                 // $TEST: prepare test data so that the code can be executed in Azure Emulator
-                Environment.PrepareTestData(actor);
+                if (prepareTestData)
+                {
+                    Environment.PrepareTestData(actor);
+                }
 
                 // Create a retrieve operation that takes a customer entity.
                 TableOperation retrieveOperation = TableOperation.Retrieve<ActorAssignment>(ActorAssignment.Key, actor.Id.ToString());
@@ -171,12 +243,11 @@ namespace Task
                 if (retrievedResult.Result != null)
                 {
                     actorEntity = (ActorAssignment)retrievedResult.Result;
-                    RoundLogger.Current.Log(string.Format("Get {0} Assignment from topology {1}, ", actorEntity.IsSpout ? "Spout" : "Bolt", actorEntity.Topology));
                 }
             }
             catch (Exception e)
             {
-                RoundLogger.Current.Log("Failed to get assignment:" + e.Message);
+                Trace.TraceInformation("Failed to get assignment:" + e.Message);
                 RoundLogger.Current.Log(e.StackTrace);
             }
 

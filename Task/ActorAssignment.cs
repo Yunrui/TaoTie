@@ -21,9 +21,12 @@ namespace Task
         {
             this.PartitionKey = ActorAssignment.Key;
             this.RowKey = actorId.ToString();
+            this.ETag = "*";
         }
 
         public ActorAssignment() { }
+
+        public string State { get; set; }
 
         public string Name { get; set; }
 
@@ -37,6 +40,10 @@ namespace Task
 
         public string GroupingField { get; set; }
 
-        public bool IsSpout { get; set; }
+        public bool? IsSpout { get; set; }
+
+        public string Operation { get; set; }
+
+        public DateTime HeartBeat { get; set; }
     }
 }

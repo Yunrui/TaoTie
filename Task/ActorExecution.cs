@@ -48,7 +48,7 @@ namespace Task
             container.ComposeParts(this);
 
             // Find right Actor based on assignment
-            if (this.assignment.IsSpout)
+            if (this.assignment.IsSpout.HasValue && this.assignment.IsSpout.Value)
             {
                 var spout = this.spouts.Where(c => c.GetType().Name == this.assignment.Name).FirstOrDefault() as ISpout;
 
@@ -70,6 +70,11 @@ namespace Task
 
                     // $NOTE: whether it's too frequent to update this field?
                     this.actor.HeartBeat = DateTime.UtcNow;
+
+                    if (this.actor.State == ActorState.Error)
+                    {
+                        break;
+                    }
 
                     // Release thread so that the other methods have a chance to be called
                     System.Threading.Thread.Sleep(1);
@@ -94,7 +99,7 @@ namespace Task
                 {
                     watch.Restart();
 
-                    // $TODO: is 100 right number?
+                    // $TODO: is 10 right number?
                     var messages = inQueue.GetMessages(10, TimeSpan.FromSeconds(30));
 
                     foreach (var message in messages)
@@ -115,6 +120,14 @@ namespace Task
                     watch.Stop();
 
                     RoundLogger.Current.Log(string.Format("The Bolt {0} takes {1} ms for this round.", assignment.Name, watch.ElapsedMilliseconds));
+
+                    // $NOTE: whether it's too frequent to update this field?
+                    this.actor.HeartBeat = DateTime.UtcNow;
+
+                    if (this.actor.State == ActorState.Error)
+                    {
+                        break;
+                    }
                 }
                 while (true);
             }
