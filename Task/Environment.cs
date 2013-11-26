@@ -76,6 +76,7 @@ namespace Task
                         InQueue = string.Empty,
                         OutQueues = "spoutoutput1,spoutoutput2",
                         SchemaGroupingMode = "ShuffleGrouping",
+                        HeartBeat = DateTime.UtcNow,
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -87,6 +88,7 @@ namespace Task
                         OutQueues = "wnboltoutput1,wnboltoutput2",
                         SchemaGroupingMode = "FieldGrouping",
                         GroupingField = "word",
+                        HeartBeat = DateTime.UtcNow,
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -98,6 +100,7 @@ namespace Task
                         OutQueues = "wnboltoutput1,wnboltoutput2",
                         SchemaGroupingMode = "FieldGrouping",
                         GroupingField = "word",
+                        HeartBeat = DateTime.UtcNow,
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -107,6 +110,7 @@ namespace Task
                         IsSpout = false,
                         InQueue = "wnboltoutput1",
                         OutQueues = null,
+                        HeartBeat = DateTime.UtcNow,
                     },
 
             new ActorAssignment(Guid.Empty)
@@ -116,6 +120,7 @@ namespace Task
                         IsSpout = false,
                         InQueue = "wnboltoutput2",
                         OutQueues = null,
+                        HeartBeat = DateTime.UtcNow,
                     },
         };
 
