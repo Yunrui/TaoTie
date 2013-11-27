@@ -139,7 +139,7 @@ namespace Task
                                 }
 
                                 ActorAssignment assignment = new ActorAssignment(id) { HeartBeat = this.actors[id].HeartBeat, State = this.actors[id].State.ToString(), };
-                                TableOperation mergeOperation = TableOperation.Merge(assignment);
+                                TableOperation mergeOperation = TableOperation.InsertOrMerge(assignment);
                                 TableResult retrievedResult = table.Execute(mergeOperation);
 
                                 Trace.TraceInformation("Actor {0} updated HeartBeat", id);
@@ -179,7 +179,7 @@ namespace Task
 
                     // if there is an assignment then
                     assignment = GetAssignment(actor);
-                    if (assignment != null)
+                    if (assignment != null && !string.IsNullOrWhiteSpace(assignment.Name))
                     {
                         actor.State = ActorState.Working;
                         RoundLogger.Current.Log("Get Assignment and switch State to Working.");

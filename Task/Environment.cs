@@ -127,7 +127,7 @@ namespace Task
         public static void PrepareTestData(Actor actor)
         {
             // $TEST: This code for testing environment only
-            if (RoleEnvironment.IsEmulated)
+            if (RoleEnvironment.IsEmulated && ActorStep < 5)
             {
                 CloudTable table = Environment.GetTable("topology");
                 ActorAssignment entity = assignments[ActorStep++];
