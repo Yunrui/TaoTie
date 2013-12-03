@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task", "Task\Task.csproj", 
 	ProjectSection(ProjectDependencies) = postProject
 		{1441E830-C237-415C-9025-47CE8DA73D7B} = {1441E830-C237-415C-9025-47CE8DA73D7B}
 		{79B52C4C-B895-4CFF-ACC9-6211A6ECD876} = {79B52C4C-B895-4CFF-ACC9-6211A6ECD876}
+		{E8848AE4-AAB2-4DF7-9045-B09CE7F49186} = {E8848AE4-AAB2-4DF7-9045-B09CE7F49186}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCountTopology", "WordCountTopology\WordCountTopology.csproj", "{1441E830-C237-415C-9025-47CE8DA73D7B}"
@@ -15,6 +16,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCountTopology", "WordCo
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrimitiveInterface", "PrimitiveInterface\PrimitiveInterface.csproj", "{79B52C4C-B895-4CFF-ACC9-6211A6ECD876}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFR", "CFR\CFR.csproj", "{E8848AE4-AAB2-4DF7-9045-B09CE7F49186}"
+	ProjectSection(ProjectDependencies) = postProject
+		{79B52C4C-B895-4CFF-ACC9-6211A6ECD876} = {79B52C4C-B895-4CFF-ACC9-6211A6ECD876}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +44,10 @@ Global
 		{79B52C4C-B895-4CFF-ACC9-6211A6ECD876}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79B52C4C-B895-4CFF-ACC9-6211A6ECD876}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79B52C4C-B895-4CFF-ACC9-6211A6ECD876}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8848AE4-AAB2-4DF7-9045-B09CE7F49186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8848AE4-AAB2-4DF7-9045-B09CE7F49186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8848AE4-AAB2-4DF7-9045-B09CE7F49186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8848AE4-AAB2-4DF7-9045-B09CE7F49186}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

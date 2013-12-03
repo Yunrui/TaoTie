@@ -99,8 +99,7 @@ namespace Task
                 {
                     watch.Restart();
 
-                    // $TODO: is 10 right number?
-                    var messages = inQueue.GetMessages(10, TimeSpan.FromSeconds(30));
+                    var messages = inQueue.GetMessages(32, TimeSpan.FromSeconds(30));
 
                     foreach (var message in messages)
                     {
@@ -111,9 +110,9 @@ namespace Task
                             continue;
                         }
 
-                        // $TODO: need to convert from message to Tuple
                         bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
 
+                        // $TODO: do I need to catch and retry for this method?
                         inQueue.DeleteMessage(message);
                     }
 

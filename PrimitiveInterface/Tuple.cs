@@ -20,7 +20,7 @@ namespace PrimitiveInterface
         /// Serialization is too slow
         /// $TODO: we need to find an elegant way later
         /// </summary>
-        private const string delimiter = "____";
+        private const string delimiter = "__$__";
         private IList<string> values = new List<string>();
 
         /// <summary>
