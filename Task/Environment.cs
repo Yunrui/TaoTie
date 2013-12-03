@@ -65,8 +65,9 @@ namespace Task
         #region Prepare Test Data
 
         private static int ActorStep = 0;
+        private static int Example = 1;
 
-        private static List<ActorAssignment> assignments = new List<ActorAssignment>()
+        private static List<ActorAssignment> wordCountAssignments = new List<ActorAssignment>()
         {
             new ActorAssignment(Guid.Empty)
                     {
@@ -124,13 +125,70 @@ namespace Task
                     },
         };
 
+        private static List<ActorAssignment> cfrAssignments = new List<ActorAssignment>()
+        {
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "CFRTopology",
+                        Name = "TagIdSpout",
+                        IsSpout = true,
+                        InQueue = string.Empty,
+                        OutQueues = "cfroutput1,cfroutput2",
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "tagId,dateTime",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "CFRTopology",
+                        Name = "TagIdGroupBolt",
+                        IsSpout = false,
+                        InQueue = "cfroutput1",
+                        OutQueues = "cfroutput3,cfroutput4",
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "page,dateTime",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "CFRTopology",
+                        Name = "TagIdGroupBolt",
+                        IsSpout = false,
+                        InQueue = "cfroutput2",
+                        OutQueues = "cfroutput3,cfroutput4",
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "page,dateTime",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "CFRTopology",
+                        Name = "PageGroupBolt",
+                        IsSpout = false,
+                        InQueue = "cfroutput3",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "CFRTopology",
+                        Name = "PageGroupBolt",
+                        IsSpout = false,
+                        InQueue = "cfroutput4",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+        };
+
         public static void PrepareTestData(Actor actor)
         {
             // $TEST: This code for testing environment only
             if (RoleEnvironment.IsEmulated && ActorStep < 5)
             {
                 CloudTable table = Environment.GetTable("topology");
-                ActorAssignment entity = assignments[ActorStep++];
+                ActorAssignment entity = Example == 0 ? wordCountAssignments[ActorStep++] : cfrAssignments[ActorStep++];
 
                 entity.RowKey = actor.Id.ToString();
 

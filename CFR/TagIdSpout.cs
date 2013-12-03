@@ -41,7 +41,7 @@ namespace WordCountTopology
                 IList<string> strs = new List<string>()
                     {
                         parts[0],
-                        string.Format("{0}-{1}", date.Date.ToShortDateString(), date.Hour),
+                        string.Format("{0}/{1}", date.Date.ToShortDateString(), date.Hour),
                         parts[4],
                         parts[5],
                     };

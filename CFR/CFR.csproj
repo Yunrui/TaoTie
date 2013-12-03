@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PageGroupBolt.cs" />
     <Compile Include="TagIdGroupBolt.cs" />
     <Compile Include="TagIdSpout.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

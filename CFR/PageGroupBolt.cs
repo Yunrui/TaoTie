@@ -13,21 +13,21 @@ using System.Threading.Tasks;
 namespace WordCountTopology
 {
     [Export(typeof(IBolt))]
-    class TagIdGroupBolt : IBolt
+    class PageGroupBolt : IBolt
     {
         private IEmitter emitter;
         private Dictionary<string, int> localCache = new Dictionary<string, int>();
         private CloudTable table;
         private TopologyContext context;
 
-        public TagIdGroupBolt()
+        public PageGroupBolt()
         {
             Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = GetStorageAccount();
 
             // Create the table client.
             Microsoft.WindowsAzure.Storage.Table.CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
 
-            this.table = tableClient.GetTableReference("tagId");
+            this.table = tableClient.GetTableReference("page");
 
             this.table.CreateIfNotExists();
         }
@@ -39,10 +39,10 @@ namespace WordCountTopology
             string page = tuple.Get(2) as string;
             string location = tuple.Get(3) as string;
 
-            string key = tagId + "_" + dateTime;
+            string key = page + "_" + dateTime;
 
-            var parts = dateTime.Split(new char[] {'/'});
-            
+            var parts = dateTime.Split(new char[] { '/' });
+
             if (localCache.ContainsKey(key))
             {
                 localCache[key]++;
@@ -55,19 +55,17 @@ namespace WordCountTopology
             // Not necessary to update database for each entry
             if (localCache[key] % 100 == 0)
             {
-                TagIdTotalCountEntry entity = new TagIdTotalCountEntry()
+                PageTotalCountEntry entity = new PageTotalCountEntry()
                 {
                     Name = key,
                     Count = localCache[key],
                     Bolt = this.context.ActorId,
-                    RowKey = tagId + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3],
+                    RowKey = page + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3],
                 };
 
                 TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
                 table.Execute(insertOperation);
             }
-
-            this.emitter.Emit(tuple);
         }
 
         public void Open(IEmitter emitter, TopologyContext context)
@@ -78,7 +76,7 @@ namespace WordCountTopology
 
         public IList<string> DeclareOutputFields()
         {
-            return new List<string>() { "tagId", "dateTime", "page", "location" };
+            return null;
         }
 
         private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()
@@ -103,16 +101,16 @@ namespace WordCountTopology
     /// <summary>
     /// ActorEntity
     /// </summary>
-    public class TagIdTotalCountEntry : TableEntity
+    public class PageTotalCountEntry : TableEntity
     {
         /// <summary>
         /// Suppose Topology Table is pretty small, so it's not necessary to Partition
         /// </summary>
-        public const string Key = "TagId";
+        public const string Key = "Page";
 
-        public TagIdTotalCountEntry()
+        public PageTotalCountEntry()
         {
-            this.PartitionKey = TagIdTotalCountEntry.Key;
+            this.PartitionKey = PageTotalCountEntry.Key;
         }
 
         public string Name { get; set; }

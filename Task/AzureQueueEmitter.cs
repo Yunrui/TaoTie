@@ -19,7 +19,7 @@ namespace Task
     {
         private List<CloudQueue> queues = new List<CloudQueue>();
         private string schemaGroupingMode = string.Empty;
-        private string groupingField = string.Empty;
+        private IList<string> groupingFields = null;
         private IList<string> declaredFields = null;
 
         /// <summary>
@@ -30,7 +30,6 @@ namespace Task
         /// <param name="groupingField"></param>
         public AzureQueueEmitter(string outQueues, string schemaGroupingMode, string groupingField, IList<string> declaredFields)
         {
-            this.groupingField = groupingField;
             this.declaredFields = declaredFields;
 
             if (!string.IsNullOrEmpty(outQueues))
@@ -46,6 +45,11 @@ namespace Task
                         this.queues.Add(Environment.GetQueue(queue));
                     }
                 }
+            }
+
+            if (!string.IsNullOrEmpty(groupingField))
+            {
+                this.groupingFields = groupingField.Split(new char[] { ',' }).ToList();
             }
         }
 
@@ -71,15 +75,13 @@ namespace Task
                     break;
 
                 case "FieldGrouping":
-
-                    if (string.IsNullOrEmpty(this.groupingField) || this.declaredFields == null || this.declaredFields.Count == 0)
+                    StringBuilder distributedValue = new StringBuilder();
+                    foreach (string filed in this.groupingFields)
                     {
-                        throw new InvalidOperationException("You must both specify GroupingField and declare Schema for FieldGrouping.");
+                        distributedValue.Append(tuple.Get(this.declaredFields.IndexOf(filed)));
                     }
 
-                    var distributeField = tuple.Get(this.declaredFields.IndexOf(this.groupingField));
-
-                    index = Math.Abs(distributeField.GetHashCode()) % this.queues.Count;
+                    index = Math.Abs(distributedValue.ToString().GetHashCode()) % this.queues.Count;
                     this.queues[index].AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
                     break;
 
