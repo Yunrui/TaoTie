@@ -19,6 +19,7 @@ namespace WordCountTopology
         private Dictionary<string, int> localCache = new Dictionary<string, int>();
         private CloudTable table;
         private TopologyContext context;
+        private DateTime lastUpdateTime = DateTime.Now;
 
         public PageGroupBolt()
         {
@@ -39,9 +40,8 @@ namespace WordCountTopology
             string page = tuple.Get(2) as string;
             string location = tuple.Get(3) as string;
 
-            string key = page + "_" + dateTime;
-
             var parts = dateTime.Split(new char[] { '/' });
+            string key = page + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3];
 
             if (localCache.ContainsKey(key))
             {
@@ -52,19 +52,23 @@ namespace WordCountTopology
                 localCache[key] = 1;
             }
 
-            // Not necessary to update database for each entry
-            if (localCache[key] % 100 == 0)
+            if ((DateTime.Now - this.lastUpdateTime).TotalSeconds > 15)
             {
-                PageTotalCountEntry entity = new PageTotalCountEntry()
-                {
-                    Name = key,
-                    Count = localCache[key],
-                    Bolt = this.context.ActorId,
-                    RowKey = page + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3],
-                };
+                this.lastUpdateTime = DateTime.Now;
 
-                TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-                table.Execute(insertOperation);
+                foreach (string k in this.localCache.Keys)
+                {
+                    PageTotalCountEntry entity = new PageTotalCountEntry()
+                    {
+                        Name = k,
+                        Count = localCache[k],
+                        Bolt = this.context.ActorId,
+                        RowKey = k,
+                    };
+
+                    TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                    table.Execute(insertOperation);
+                }
             }
         }
 
