@@ -15,6 +15,8 @@ namespace Task
     {
         public override void Run()
         {
+            ServicePointManager.DefaultConnectionLimit = 10;
+
             // This is a sample worker implementation. Replace with your logic.
             Trace.TraceInformation("Task entry point called");
             Service service = new Service();

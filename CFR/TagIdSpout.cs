@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using PrimitiveInterface;
 using System.Diagnostics;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace WordCountTopology
 {
@@ -16,26 +18,27 @@ namespace WordCountTopology
     public class TagIdSpout : ISpout
     {
         private IEmitter emitter;
-        private IList<string> sentences = new List<string>()
+        private CloudQueue queue;
+
+        public TagIdSpout()
         {
-            "8819|#|2013/11/18 1:58:59|#|f813b2f7-52cf-449d-8ed9-6962b824e430|#|ab3cba58-4a39-42f6-90e0-069984daece6|#|StaleMailbox1|#|203.45.231.122|#|SEA",
-            "8820|#|2013/11/18 1:59:59|#|f813b2f7-52cf-449d-8ed9-6962b824e430|#|ab3cba58-4a39-42f6-90e0-069984daece6|#|StaleMailbox2|#|203.45.231.122|#|SEA",
-            "8819|#|2013/11/18 2:50:59|#|f813b2f7-52cf-449d-8ed9-6962b824e430|#|ab3cba58-4a39-42f6-90e0-069984daece6|#|StaleMailbox3|#|203.45.231.122|#|SEA",
-            "8819|#|2013/11/18 2:51:59|#|f813b2f7-52cf-449d-8ed9-6962b824e430|#|ab3cba58-4a39-42f6-90e0-069984daece6|#|StaleMailbox4|#|203.45.231.122|#|SEA",
-            "8819|#|2013/11/18 2:52:59|#|f813b2f7-52cf-449d-8ed9-6962b824e430|#|ab3cba58-4a39-42f6-90e0-069984daece6|#|StaleMailbox5|#|203.45.231.122|#|SEA",
-        };
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=http;AccountName=lqueue;AccountKey=vtVWSPvFXzJ3WzHcKpFbU9GY5YNsDGs493FMaxXpZFhwLN/pyfICpAOQcfj+QSP8T/r4yeIEHLOgKurPPB9EPQ==");
+            CloudQueueClient client = storageAccount.CreateCloudQueueClient();
+            this.queue = client.GetQueueReference("cfr");
+        }
 
         public void Execute()
         {
-            // The basic pattern is to access data source outside
-            // and emit a bunch of tuple then return
+            var messages = this.queue.GetMessages(32, TimeSpan.FromSeconds(30));
 
-            Random random = new Random();
-
-            for (int i = 0; i < 1000; i++)
+            foreach (var message in messages)
             {
-                string log = this.sentences[random.Next(4)];
-                var parts = log.Split(new string[] {"|#|"}, StringSplitOptions.RemoveEmptyEntries);
+                if (message == null)
+                {
+                    break;
+                }
+
+                var parts = message.AsString.Split(new string[] { "|#|" }, StringSplitOptions.RemoveEmptyEntries);
 
                 var date = DateTime.Parse(parts[1]);
                 IList<string> strs = new List<string>()
@@ -47,6 +50,8 @@ namespace WordCountTopology
                     };
 
                 this.emitter.Emit(new PrimitiveInterface.Tuple(strs));
+
+                this.queue.DeleteMessage(message);
             }
         }
 

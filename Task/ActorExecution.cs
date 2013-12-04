@@ -107,7 +107,7 @@ namespace Task
                         {
                             // Release thread so that the other methods have a chance to be called
                             System.Threading.Thread.Sleep(1);
-                            continue;
+                            break;
                         }
 
                         bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
