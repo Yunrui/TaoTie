@@ -40,6 +40,12 @@ namespace WordCountTopology
             string page = tuple.Get(2) as string;
             string location = tuple.Get(3) as string;
 
+            // Summary Page on 
+            if (string.IsNullOrWhiteSpace(page) || !string.Equals(tagId, "8819"))
+            {
+                return;
+            }
+
             var parts = dateTime.Split(new char[] { '/' });
             string key = page + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3];
 
