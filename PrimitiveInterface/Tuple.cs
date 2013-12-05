@@ -58,7 +58,7 @@ namespace PrimitiveInterface
 
         public static Tuple Parse(string message)
         {
-            var parts = message.Split(new string[] { Tuple.delimiter }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = message.Split(new string[] { Tuple.delimiter }, StringSplitOptions.None);
 
             return new Tuple(parts.ToList());
         }

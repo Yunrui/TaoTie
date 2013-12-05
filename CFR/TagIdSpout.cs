@@ -38,7 +38,12 @@ namespace WordCountTopology
                     break;
                 }
 
-                var parts = message.AsString.Split(new string[] { "|#|" }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = message.AsString.Split(new string[] { "|#|" }, StringSplitOptions.None);
+
+                if (parts.Length != 7)
+                {
+                    throw new ArgumentException(string.Format("The following message {0} is not valid.", message.AsString));
+                }
 
                 var date = DateTime.Parse(parts[1]);
                 IList<string> strs = new List<string>()

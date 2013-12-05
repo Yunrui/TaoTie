@@ -45,5 +45,9 @@ namespace Task
         public string Operation { get; set; }
 
         public DateTime HeartBeat { get; set; }
+
+        public string ErrorMessage { get; set; }
+
+        public string ErrorStack { get; set; }
     }
 }

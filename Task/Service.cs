@@ -35,6 +35,18 @@ namespace Task
             set;
         }
 
+        public string ErrorMessage
+        {
+            get;
+            set;
+        }
+
+        public string ErrorStack
+        {
+            get;
+            set;
+        }
+
         public Guid Id
         {
             get;
@@ -115,41 +127,40 @@ namespace Task
                     // Remove Actor which in Error State, and fork a new one
                     foreach (Guid id in this.actors.Keys)
                     {
+                        // NOTE: we still give Actor in Error State the last chance to report its state.
                         if (this.actors[id].State == ActorState.Error)
                         {
                             // Cannot modify this.actors in foreach
                             errorActors.Add(id);
                         }
-                        else
+
+                        try
                         {
-                            try
+                            if (this.actors[id].State == ActorState.Working)
                             {
+                                var ass = GetAssignment(this.actors[id], false);
 
-                                if (this.actors[id].State == ActorState.Working)
+                                if (ass != null)
                                 {
-                                    var ass = GetAssignment(this.actors[id], false);
-
-                                    if (ass != null)
+                                    if (string.Equals("Kill", ass.Operation, StringComparison.OrdinalIgnoreCase))
                                     {
-                                        if (string.Equals("Kill", ass.Operation, StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            // I didn't lock this Actor considering there is no state transition from Working to non Error.
-                                            this.actors[id].State = ActorState.Error;
-                                        }
+                                        // I didn't lock this Actor considering there is no state transition from Working to non Error.
+                                        this.actors[id].State = ActorState.Error;
                                     }
                                 }
-
-                                ActorAssignment assignment = new ActorAssignment(id) { HeartBeat = this.actors[id].HeartBeat, State = this.actors[id].State.ToString(), };
-                                TableOperation mergeOperation = TableOperation.InsertOrMerge(assignment);
-                                TableResult retrievedResult = table.Execute(mergeOperation);
-
-                                Trace.TraceInformation("Actor {0} updated HeartBeat", id);
                             }
-                            catch (Exception e)
-                            {
-                                Trace.TraceInformation("Actor {0} failed to update HeartBeat due to {1}", id, e.Message);
-                            }
+
+                            ActorAssignment assignment = new ActorAssignment(id) { HeartBeat = this.actors[id].HeartBeat, State = this.actors[id].State.ToString(), ErrorMessage = this.actors[id].ErrorMessage, ErrorStack = this.actors[id].ErrorStack};
+                            TableOperation mergeOperation = TableOperation.InsertOrMerge(assignment);
+                            TableResult retrievedResult = table.Execute(mergeOperation);
+
+                            Trace.TraceInformation("Actor {0} updated HeartBeat", id);
                         }
+                        catch (Exception e)
+                        {
+                            Trace.TraceInformation("Actor {0} failed to update HeartBeat due to {1}", id, e.Message);
+                        }
+
                     }
 
                     foreach (Guid id in errorActors)
@@ -205,6 +216,9 @@ namespace Task
                     catch(Exception e)
                     {
                         actor.State = ActorState.Error;
+                        actor.ErrorMessage = e.Message;
+                        actor.ErrorStack = e.StackTrace;
+                        
                         RoundLogger.Current.Log("Failed to execute topology:" + e.Message);
                         RoundLogger.Current.Log(e.StackTrace);
                     }
