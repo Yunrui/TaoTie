@@ -112,8 +112,15 @@ namespace Task
 
                         bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
 
-                        // $TODO: do I need to catch and retry for this method?
-                        inQueue.DeleteMessage(message);
+                        try
+                        {
+                            inQueue.DeleteMessage(message);
+                        }
+                        catch (Exception)
+                        {
+                            // ignore any exceptions
+                            // Let's make sure infra can handle all exception cases so that this bolt won't be stopped by it
+                        }
                     }
 
                     watch.Stop();
