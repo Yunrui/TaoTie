@@ -12,7 +12,7 @@
     <AzureHostedServiceLabel>TaoTie</AzureHostedServiceLabel>
     <AzureHostedServiceName>TaoTie</AzureHostedServiceName>
     <AzureEnableIntelliTrace>False</AzureEnableIntelliTrace>
-    <AzureEnableProfiling>False</AzureEnableProfiling>
+    <AzureEnableProfiling>True</AzureEnableProfiling>
     <AzureServiceConfiguration>Cloud</AzureServiceConfiguration>
     <AzureSolutionConfiguration>Release</AzureSolutionConfiguration>
     <AzureStorageAccountLabel>taotie</AzureStorageAccountLabel>

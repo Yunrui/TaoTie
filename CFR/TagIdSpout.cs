@@ -31,11 +31,17 @@ namespace WordCountTopology
         {
             var messages = this.queue.GetMessages(32, TimeSpan.FromSeconds(30));
 
+            if (messages.Count() == 0)
+            {
+                // Let's sleep for a while since the queue is empty
+                System.Threading.Thread.Sleep(10000);
+            }
+
             foreach (var message in messages)
             {
                 if (message == null)
                 {
-                    break;
+                    continue;
                 }
 
                 var parts = message.AsString.Split(new string[] { "|#|" }, StringSplitOptions.None);

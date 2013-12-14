@@ -101,29 +101,36 @@ namespace Task
 
                     var messages = inQueue.GetMessages(32, TimeSpan.FromSeconds(30));
 
-                    foreach (var message in messages)
+                    if (messages.Count() == 0)
                     {
-                        if (message == null)
-                        {
-                            // Release thread so that the other methods have a chance to be called
-                            System.Threading.Thread.Sleep(1);
-                            break;
-                        }
-
-                        bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
-
-                        try
-                        {
-                            inQueue.DeleteMessage(message);
-                        }
-                        catch (Exception)
-                        {
-                            // ignore any exceptions
-                            // Let's make sure infra can handle all exception cases so that this bolt won't be stopped by it
-                        }
+                        // We stop watch first so that sleeping time not count into this round
+                        watch.Stop();
+                        System.Threading.Thread.Sleep(10000);
                     }
+                    else
+                    {
+                        foreach (var message in messages)
+                        {
+                            if (message == null)
+                            {
+                                continue;
+                            }
 
-                    watch.Stop();
+                            bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
+
+                            try
+                            {
+                                inQueue.DeleteMessage(message);
+                            }
+                            catch (Exception)
+                            {
+                                // ignore any exceptions
+                                // Let's make sure infra can handle all exception cases so that this bolt won't be stopped by it
+                            }
+                        }
+
+                        watch.Stop();
+                    }
 
                     RoundLogger.Current.Log(string.Format("The Bolt {0} takes {1} ms for this round.", assignment.Name, watch.ElapsedMilliseconds));
 
