@@ -65,7 +65,65 @@ namespace Task
         #region Prepare Test Data
 
         private static int ActorStep = 0;
-        private static int Example = 1;
+        private static int Example = 2;
+
+        private static List<ActorAssignment> DQCompletnessAssignments = new List<ActorAssignment>()
+        {
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "DQTopology",
+                        Name = "DQLogSpout",
+                        IsSpout = true,
+                        InQueue = string.Empty,
+                        OutQueues = "dqspoutoutput1,dqspoutoutput2",
+                        SchemaGroupingMode = "ShuffleGrouping",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "DQTopology",
+                        Name = "DQLogParserBolt",
+                        IsSpout = false,
+                        InQueue = "dqspoutoutput1",
+                        OutQueues = "dqparserboltoutput1,dqparserboltoutput2",
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "dateTime,report",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "DQTopology",
+                        Name = "DQLogParserBolt",
+                        IsSpout = false,
+                        InQueue = "dqspoutoutput2",
+                        OutQueues = "dqparserboltoutput1,dqparserboltoutput2",
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "dateTime,report",
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "DQTopology",
+                        Name = "ReportGroupCompletnessBolt",
+                        IsSpout = false,
+                        InQueue = "dqparserboltoutput1",
+                        OutQueues = null,
+                        HeartBeat = DateTime.UtcNow,
+                    },
+
+            new ActorAssignment(Guid.Empty)
+                    {
+                        Topology = "DQTopology",
+                        Name = "ReportGroupCompletnessBolt",
+                        IsSpout = false,
+                        InQueue = "dqparserboltoutput2",
+                        OutQueues = null,
+                        HeartBeat = DateTime.UtcNow,
+                    },
+        };
 
         private static List<ActorAssignment> wordCountAssignments = new List<ActorAssignment>()
         {
@@ -188,7 +246,22 @@ namespace Task
             if (RoleEnvironment.IsEmulated && ActorStep < 5)
             {
                 CloudTable table = Environment.GetTable("topology");
-                ActorAssignment entity = Example == 0 ? wordCountAssignments[ActorStep++] : cfrAssignments[ActorStep++];
+                ActorAssignment entity;
+                switch(Example)
+                {
+                    case 0:
+                        entity = wordCountAssignments[ActorStep++];
+                        break;
+                    case 1:
+                        entity = cfrAssignments[ActorStep++];
+                        break;
+                    case 2:
+                        entity = DQCompletnessAssignments[ActorStep++];
+                        break;
+                    default:
+                        entity = wordCountAssignments[ActorStep++];
+                        break;
+                }
 
                 entity.RowKey = actor.Id.ToString();
 
