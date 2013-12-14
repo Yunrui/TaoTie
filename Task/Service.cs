@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Queue;
 using System.ComponentModel.Composition;
 using System.Net;
+using AzureAdapter;
 
 namespace Task
 {
@@ -239,26 +240,13 @@ namespace Task
 
             try
             {
-                // Create the CloudTable object that represents the "topology" table.
-                CloudTable table = Environment.GetTable("topology");
-
                 // $TEST: prepare test data so that the code can be executed in Azure Emulator
                 if (prepareTestData)
                 {
                     Environment.PrepareTestData(actor);
                 }
 
-                // Create a retrieve operation that takes a customer entity.
-                TableOperation retrieveOperation = TableOperation.Retrieve<ActorAssignment>(ActorAssignment.Key, actor.Id.ToString());
-
-                // Execute the retrieve operation.
-                TableResult retrievedResult = table.Execute(retrieveOperation);
-
-                // Get Assignment
-                if (retrievedResult.Result != null)
-                {
-                    actorEntity = (ActorAssignment)retrievedResult.Result;
-                }
+                actorEntity = Assignment.GetAssignment(actor.Id.ToString());
             }
             catch (Exception e)
             {

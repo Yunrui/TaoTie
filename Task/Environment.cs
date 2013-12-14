@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using AzureAdapter;
 
 namespace Task
 {
@@ -48,24 +49,13 @@ namespace Task
         /// <returns></returns>
         private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()
         {
-            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = null;
-
-            if (RoleEnvironment.IsEmulated)
-            {
-                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.DevelopmentStorageAccount;
-            }
-            else
-            {
-                // Retrieve the storage account from the connection string.
-                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"));
-            }
-            return storageAccount;
+            return StorageAccount.GetAccount();
         }
 
         #region Prepare Test Data
 
         private static int ActorStep = 0;
-        private static int Example = 2;
+        private static int Example = 0;
 
         private static List<ActorAssignment> DQCompletnessAssignments = new List<ActorAssignment>()
         {

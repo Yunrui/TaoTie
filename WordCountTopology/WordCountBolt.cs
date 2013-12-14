@@ -25,7 +25,7 @@ namespace WordCountTopology
         {
             name = (new Random(DateTime.Now.Millisecond)).Next();
 
-            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = GetStorageAccount();
+            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = StorageAccount.GetAccount();
 
             // Create the table client.
             Microsoft.WindowsAzure.Storage.Table.CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
@@ -54,7 +54,7 @@ namespace WordCountTopology
             }
 
             // Not necessary to update database for each entry
-            if (wordsCount[value] % 1000 == 0)
+            if (wordsCount[value] % 100 == 0)
             {
                 WordCountEntry entity = new WordCountEntry()
                 {
@@ -78,22 +78,6 @@ namespace WordCountTopology
         public IList<string> DeclareOutputFields()
         {
             return null;
-        }
-
-        private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()
-        {
-            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = null;
-
-            if (RoleEnvironment.IsEmulated)
-            {
-                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.DevelopmentStorageAccount;
-            }
-            else
-            {
-                // Retrieve the storage account from the connection string.
-                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"));
-            }
-            return storageAccount;
         }
     }
 

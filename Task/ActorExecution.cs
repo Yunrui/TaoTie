@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Queue;
 using PrimitiveInterface;
 using System.Diagnostics;
+using AzureAdapter;
 
 namespace Task
 {
