@@ -24,7 +24,10 @@ namespace AzureAdapter
             this.ETag = "*";
         }
 
-        public ActorAssignment() { }
+        public ActorAssignment() 
+        {
+            this.PartitionKey = ActorAssignment.Key;
+        }
 
         public string State { get; set; }
 

@@ -10,4 +10,10 @@
       <LocalStorage name="LocalStorage1" cleanOnRoleRecycle="true" />
     </LocalResources>
   </WorkerRole>
+  <WorkerRole name="Master" vmsize="ExtraSmall">
+    <Imports>
+      <Import moduleName="Diagnostics" />
+      <Import moduleName="RemoteAccess" />
+    </Imports>
+  </WorkerRole>
 </ServiceDefinition>

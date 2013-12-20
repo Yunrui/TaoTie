@@ -240,8 +240,9 @@ namespace Task
                 switch(Example)
                 {
                     case 0:
-                        entity = wordCountAssignments[ActorStep++];
-                        break;
+                        // $NOTE: master role is taking over this testing method
+                        // entity = wordCountAssignments[ActorStep++];
+                        return;
                     case 1:
                         entity = cfrAssignments[ActorStep++];
                         break;

@@ -37,6 +37,14 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Master\Master.csproj">
+      <Name>Master</Name>
+      <Project>{ceac54a1-68d8-4a33-ad69-db254d49713d}</Project>
+      <Private>True</Private>
+      <RoleType>Worker</RoleType>
+      <RoleName>Master</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
     <ProjectReference Include="..\Task\Task.csproj">
       <Name>Task</Name>
       <Project>{2b5f0227-71e7-4325-999c-cd28ee37bb46}</Project>
