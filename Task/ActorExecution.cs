@@ -100,7 +100,7 @@ namespace Task
                 {
                     watch.Restart();
 
-                    var messages = inQueue.GetMessages(32, TimeSpan.FromSeconds(30));
+                    var messages = inQueue.GetMessages(32, TimeSpan.FromDays(7));
 
                     if (messages.Count() == 0)
                     {
@@ -119,6 +119,9 @@ namespace Task
 
                             bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
 
+                            /*
+                             * $EXPERIMENT: can we not delete messages (which is very slow), but set visiblityTimeOut to 7days?
+                             * Retention can remvoe it immediately without perf penalty on looking up?
                             try
                             {
                                 inQueue.DeleteMessage(message);
@@ -128,6 +131,7 @@ namespace Task
                                 // ignore any exceptions
                                 // Let's make sure infra can handle all exception cases so that this bolt won't be stopped by it
                             }
+                             * */
                         }
 
                         watch.Stop();
