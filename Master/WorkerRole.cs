@@ -19,18 +19,27 @@ namespace Master
             // This is a sample worker implementation. Replace with your logic.
             Trace.WriteLine("Master entry point called", "Information");
 
+            DiagnosticLogger logger = new DiagnosticLogger("Master");
+
             while (true)
             {
                 Thread.Sleep(10000);
                 Trace.WriteLine("Working", "Information");
 
-                IList<ActorAssignment> assignments = Assignment.GetRunningActors();
-
-                IList<TopologyMetadata> metadatas = TopologyBuilder.GetTopologyMetadata();
-
-                foreach (TopologyMetadata topology in metadatas)
+                try
                 {
-                    topology.DoAssignment(assignments);
+                    IList<ActorAssignment> assignments = Assignment.GetRunningActors();
+
+                    IList<TopologyMetadata> metadatas = TopologyBuilder.GetTopologyMetadata();
+
+                    foreach (TopologyMetadata topology in metadatas)
+                    {
+                        topology.DoAssignment(assignments);
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.Log(e);
                 }
             }
         }
