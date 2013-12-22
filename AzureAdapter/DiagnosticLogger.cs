@@ -31,6 +31,8 @@ namespace AzureAdapter
                 }
 
                 DiagnosticEntity entity = new DiagnosticEntity(string.Format("{0}-{1}", this.prefix, Guid.NewGuid()));
+                entity.ErrorMessage = exception.Message;
+                entity.Stack = exception.StackTrace;
                 TableOperation operation = TableOperation.Insert(entity);
                 table.Execute(operation);
             }

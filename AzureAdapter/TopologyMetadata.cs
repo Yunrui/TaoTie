@@ -79,7 +79,8 @@ namespace AzureAdapter
 
         public void DoAssignment(IList<ActorAssignment> assignments)
         {
-            var runningActors = assignments.Where(c => string.Equals(c.Topology, this.Name) && c.State == "Working");
+            // It's possible that an actor is just assigned but not taken, so NewBorn is also a valid state
+            var runningActors = assignments.Where(c => string.Equals(c.Topology, this.Name) && (c.State == "Working" || c.State == "NewBorn"));
 
             IList<ActorAssignment> list = new List<ActorAssignment>();
 
@@ -99,7 +100,10 @@ namespace AzureAdapter
                             IsSpout = metadata.IsSpout,
                             SchemaGroupingMode = metadata.SchemaGroupingMode,
                             GroupingField = metadata.GroupingField,
-                            ETag = "*",
+
+                            // $NOTE: try to fix bug
+                            State = "NewBorn",
+                            HeartBeat = DateTime.UtcNow,
                         };
 
                     list.Add(newAssignment);

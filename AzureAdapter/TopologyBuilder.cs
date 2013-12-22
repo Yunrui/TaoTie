@@ -13,7 +13,7 @@ namespace AzureAdapter
         public static void DoAssignment(ActorAssignment assignment)
         {
             CloudTable table = StorageAccount.GetTable("topology");
-            TableOperation mergeOperation = TableOperation.Merge(assignment);
+            TableOperation mergeOperation = TableOperation.InsertOrReplace(assignment);
             TableResult retrievedResult = table.Execute(mergeOperation);
         }
 
