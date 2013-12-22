@@ -76,7 +76,7 @@ namespace Task
         /// <summary>
         /// How many Tasks (Spout/Bolt) in a Service Role
         /// </summary>
-        private const int ConcurrentTask = 5;
+        private const int ConcurrentTask = 10;
 
         /// <summary>
         /// ctor

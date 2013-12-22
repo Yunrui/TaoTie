@@ -19,6 +19,7 @@ namespace WordCountTopology
         private Dictionary<string, int> wordsCount = new Dictionary<string, int>();
         private CloudTable table;
         private TopologyContext context;
+        private DateTime lastUpdateTime = DateTime.Now;
 
         private int name = 0;
         public WordCountBolt()
@@ -53,19 +54,22 @@ namespace WordCountTopology
                 wordsCount[value] = 1;
             }
 
-            // Not necessary to update database for each entry
-            if (wordsCount[value] % 100 == 0)
+            if ((DateTime.Now - this.lastUpdateTime).TotalSeconds > 15)
             {
-                WordCountEntry entity = new WordCountEntry()
+                this.lastUpdateTime = DateTime.Now;
+                foreach (string k in this.wordsCount.Keys)
                 {
-                    Word = value,
-                    Count = wordsCount[value],
-                    Bolt = this.context.ActorId,
-                    RowKey = value + "____" + this.context.ActorId,
-                };
+                    WordCountEntry entity = new WordCountEntry()
+                    {
+                        Word = k,
+                        Count = wordsCount[k],
+                        Bolt = this.context.ActorId,
+                        RowKey = k + "____" + this.context.ActorId,
+                    };
 
-                TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-                table.Execute(insertOperation);
+                    TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                    table.Execute(insertOperation);
+                }
             }
         }
 
