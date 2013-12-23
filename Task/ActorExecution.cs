@@ -110,14 +110,14 @@ namespace Task
                     }
                     else
                     {
-                        foreach (var message in messages)
+                        foreach (var message in MessageQueue.Parse(messages))
                         {
                             if (message == null)
                             {
                                 continue;
                             }
 
-                            bolt.Execute(PrimitiveInterface.Tuple.Parse(message.AsString));
+                            bolt.Execute(PrimitiveInterface.Tuple.Parse(message));
 
                             /*
                              * $EXPERIMENT: can we not delete messages (which is very slow), but set visiblityTimeOut to 7days?
