@@ -59,7 +59,7 @@ namespace Task
                     throw new InvalidOperationException(string.Format("Spout {0} cannot be loaded.", this.assignment.Name));
                 }
 
-                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, spout.DeclareOutputFields());
+                IEmitter emitter = new MessageEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, spout.DeclareOutputFields());
                 spout.Open(emitter, new TopologyContext() { ActorId = actor.Id.ToString(), });
                 do
                 {
@@ -84,8 +84,6 @@ namespace Task
             }
             else
             {
-                CloudQueue inQueue = Environment.GetQueue(this.assignment.InQueue);
-
                 var bolt = this.bolts.Where(c => c.GetType().Name == this.assignment.Name).FirstOrDefault() as IBolt;
 
                 if (bolt == null)
@@ -94,8 +92,10 @@ namespace Task
                     throw new InvalidOperationException(string.Format("Bolt {0} cannot be loaded.", this.assignment.Name));
                 }
 
-                IEmitter emitter = new AzureQueueEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, bolt.DeclareOutputFields());
+                IEmitter emitter = new MessageEmitter(this.assignment.OutQueues, this.assignment.SchemaGroupingMode, this.assignment.GroupingField, bolt.DeclareOutputFields());
                 bolt.Open(emitter, new TopologyContext() { ActorId = actor.Id.ToString(), });
+
+                CloudQueue inQueue = StorageAccount.GetQueue(this.assignment.InQueue);
                 do
                 {
                     watch.Restart();

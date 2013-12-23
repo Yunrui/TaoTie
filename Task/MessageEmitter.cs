@@ -15,9 +15,9 @@ namespace Task
     /// <remarks>
     /// How AzureQueue compares with ZeroMQ? 
     /// </remarks>
-    class AzureQueueEmitter : IEmitter
+    class MessageEmitter : IEmitter
     {
-        private List<CloudQueue> queues = new List<CloudQueue>();
+        private List<MessageQueue> queues = new List<MessageQueue>();
         private string schemaGroupingMode = string.Empty;
         private IList<string> groupingFields = null;
         private IList<string> declaredFields = null;
@@ -28,7 +28,7 @@ namespace Task
         /// <param name="outQueues"></param>
         /// <param name="schemaGroupingMode"></param>
         /// <param name="groupingField"></param>
-        public AzureQueueEmitter(string outQueues, string schemaGroupingMode, string groupingField, IList<string> declaredFields)
+        public MessageEmitter(string outQueues, string schemaGroupingMode, string groupingField, IList<string> declaredFields)
         {
             this.declaredFields = declaredFields;
 
@@ -42,7 +42,7 @@ namespace Task
                 {
                     foreach (string queue in parts)
                     {
-                        this.queues.Add(Environment.GetQueue(queue));
+                        this.queues.Add(MessageQueue.Get(queue));
                     }
                 }
             }
@@ -71,7 +71,7 @@ namespace Task
             {
                 case "ShuffleGrouping":
                     index = random.Next(this.queues.Count);
-                    this.queues[index].AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
+                    this.queues[index].AddMessage(tuple);
                     break;
 
                 case "FieldGrouping":
@@ -82,13 +82,13 @@ namespace Task
                     }
 
                     index = Math.Abs(distributedValue.ToString().GetHashCode()) % this.queues.Count;
-                    this.queues[index].AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
+                    this.queues[index].AddMessage(tuple);
                     break;
 
                 case "AllGrouping":
-                    foreach (CloudQueue queue in this.queues)
+                    foreach (MessageQueue queue in this.queues)
                     {
-                        queue.AddMessage(new CloudQueueMessage(tuple.GetSeriliableContent()));
+                        queue.AddMessage(tuple);
                     }
                     break;
 

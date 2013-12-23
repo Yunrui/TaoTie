@@ -119,7 +119,7 @@ namespace Task
 
                 Trace.TraceInformation("Service Maintain {0}", RoleEnvironment.DeploymentId);
 
-                CloudTable table = Environment.GetTable("topology");
+                CloudTable table = StorageAccount.GetTable("topology");
 
                 lock (LockObject)
                 {
