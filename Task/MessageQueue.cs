@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Task
 {
@@ -76,6 +77,8 @@ namespace Task
                 {
                     long totalSize = 0;
                     List<String> messages = new List<string>();
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
 
                     while (this.waitingTuples.Count() > 0)
                     {
@@ -95,11 +98,22 @@ namespace Task
                             this.azureQueue.AddMessage(new CloudQueueMessage(String.Join(delimiter, messages)));
                             totalSize = 0;
                             messages = new List<string>();
+
+                            // $NOTE: 30s is the up limit for any actors
+                            // Actor must send heartbeat in time, otherwise it will be "fault-tolerant"
+                            if (watch.Elapsed.TotalSeconds > 20)
+                            {
+                                watch.Stop();
+                                break;
+                            }
                         }
                     }
 
                     // Send the last group of messages also
-                    this.azureQueue.AddMessage(new CloudQueueMessage(String.Join(delimiter, messages)));
+                    if (messages.Count() > 0)
+                    {
+                        this.azureQueue.AddMessage(new CloudQueueMessage(String.Join(delimiter, messages)));
+                    }
 
                     this.lastUpdateTime = DateTime.Now;
                 }

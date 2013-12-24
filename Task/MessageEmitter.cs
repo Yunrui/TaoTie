@@ -21,6 +21,7 @@ namespace Task
         private string schemaGroupingMode = string.Empty;
         private IList<string> groupingFields = null;
         private IList<string> declaredFields = null;
+        private Random random = new Random();
 
         /// <summary>
         /// ctor
@@ -64,13 +65,11 @@ namespace Task
                 throw new InvalidOperationException("This bolt doesn't have any output queue enabled.");
             }
 
-            Random random = new Random();
-
             int index = 0;
             switch (this.schemaGroupingMode)
             {
                 case "ShuffleGrouping":
-                    index = random.Next(this.queues.Count);
+                    index = this.random.Next(this.queues.Count);
                     this.queues[index].AddMessage(tuple);
                     break;
 
