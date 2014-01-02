@@ -65,6 +65,9 @@
     <Content Include="TaskContent\CFR.dll">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="TaskContent\CFR.pdb">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="TaskContent\DQCompletness.dll">
       <SubType>Content</SubType>
     </Content>

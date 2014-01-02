@@ -61,12 +61,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logger.cs" />
     <Compile Include="PageGroupBolt.cs" />
     <Compile Include="TagIdGroupBolt.cs" />
     <Compile Include="TagIdSpout.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureAdapter\AzureAdapter.csproj">
+      <Project>{5b5213b2-3321-46b1-b7c5-8b786b04346f}</Project>
+      <Name>AzureAdapter</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PrimitiveInterface\PrimitiveInterface.csproj">
       <Project>{79b52c4c-b895-4cff-acc9-6211a6ecd876}</Project>
       <Name>PrimitiveInterface</Name>
@@ -74,6 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

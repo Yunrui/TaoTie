@@ -10,6 +10,8 @@ namespace AzureAdapter
 {
     public class TopologyBuilder
     {
+        private static SpoutType spoutType = SpoutType.CFR;
+
         public static void DoAssignment(ActorAssignment assignment)
         {
             CloudTable table = StorageAccount.GetTable("topology");
@@ -24,10 +26,21 @@ namespace AzureAdapter
             // Build word count topology for test
             if (RoleEnvironment.IsEmulated)
             {
-                foreach (ActorMetadata entity in wordCountMetadatas)
+                if (spoutType == SpoutType.WordCount)
                 {
-                    TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-                    table.Execute(insertOperation);
+                    foreach (ActorMetadata entity in wordCountMetadatas)
+                    {
+                        TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                        table.Execute(insertOperation);
+                    }
+                }
+                else if (spoutType == SpoutType.CFR)
+                {
+                    foreach (ActorMetadata entity in cfrMetadatas)
+                    {
+                        TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                        table.Execute(insertOperation);
+                    }
                 }
             }
 
@@ -48,6 +61,13 @@ namespace AzureAdapter
             }
 
             return metadata.Values.ToList();
+        }
+
+        public enum SpoutType
+        {
+            WordCount = 0,
+            CFR = 1,
+            DataQuality = 2
         }
 
         #region Test Data
@@ -74,6 +94,33 @@ namespace AzureAdapter
                         IsSpout = false,
                         ParallelCount = 2,
                         Parent = "WordNormalizeBolt",
+                    },
+        };
+
+        private static List<ActorMetadata> cfrMetadatas = new List<ActorMetadata>()
+        {
+            new ActorMetadata("TagIdSpout", "CFRTopology")
+                    {
+                        IsSpout = true,
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "tagId,dateTime",
+                        ParallelCount = 1,
+                    },
+
+            new ActorMetadata("TagIdGroupBolt", "CFRTopology")
+                    {
+                        IsSpout = false,
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "page,dateTime",
+                        ParallelCount = 2,
+                        Parent = "TagIdSpout",
+                    },
+
+            new ActorMetadata("PageGroupBolt", "CFRTopology")
+                    {
+                        IsSpout = false,
+                        ParallelCount = 2,
+                        Parent = "TagIdGroupBolt",
                     },
         };
         #endregion

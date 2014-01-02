@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WordCountTopology
+namespace CFR
 {
     [Export(typeof(IBolt))]
     class PageGroupBolt : IBolt
@@ -105,8 +105,6 @@ namespace WordCountTopology
             return storageAccount;
         }
     }
-
-
 
     /// <summary>
     /// ActorEntity
