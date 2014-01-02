@@ -61,8 +61,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DQLogProcessor.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="PageGroupBolt.cs" />
+    <Compile Include="ReportGroupCompletnessBolt.cs" />
     <Compile Include="TagIdGroupBolt.cs" />
     <Compile Include="TagIdSpout.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

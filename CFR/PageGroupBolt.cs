@@ -39,8 +39,24 @@ namespace CFR
             string dateTime = tuple.Get(1) as string;
             string page = tuple.Get(2) as string;
             string location = tuple.Get(3) as string;
+            string tenantName = tuple.Get(4) as string;
+            string reportName = tuple.Get(5) as string;
+            string completness = tuple.Get(6) as string;
 
-            // Summary Page on 
+            // Summary Page on
+            if (string.Equals(tagId, "171242"))
+            {
+                IList<string> strs = new List<string>()
+                {
+                   dateTime,
+                   tenantName,
+                   reportName,
+                   completness,
+                   location
+                };
+                this.emitter.Emit(new PrimitiveInterface.Tuple(strs));
+                return;
+            }
             if (string.IsNullOrWhiteSpace(page) || !string.Equals(tagId, "8819"))
             {
                 return;
@@ -86,7 +102,7 @@ namespace CFR
 
         public IList<string> DeclareOutputFields()
         {
-            return null;
+            return new List<string>() { "dateTime", "tenantName", "report", "completness", "location"};
         }
 
         private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()

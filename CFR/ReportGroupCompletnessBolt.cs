@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DQCompletness
+namespace CFR
 {
     [Export(typeof(IBolt))]
     class ReportGroupCompletnessBolt : IBolt
@@ -40,6 +40,7 @@ namespace DQCompletness
             string tenantName = tuple.Get(1) as string;
             string reportName = tuple.Get(2) as string;
             string completness = tuple.Get(3) as string;
+            string location = tuple.Get(4) as string;
 
             string key = reportName + "_" + dateTime;
 

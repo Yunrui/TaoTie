@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DQCompletness
+namespace CFR
 {
     /// <summary>
     /// DQLogProcessor is used to parse DQLog and calacuate per request completness

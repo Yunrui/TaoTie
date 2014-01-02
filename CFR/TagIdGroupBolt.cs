@@ -39,6 +39,9 @@ namespace CFR
             string dateTime = tuple.Get(1) as string;
             string page = tuple.Get(2) as string;
             string location = tuple.Get(3) as string;
+            string tenantName = tuple.Get(4) as string;
+            string reportName = tuple.Get(5) as string;
+            string completness = tuple.Get(6) as string;
 
             var parts = dateTime.Split(new char[] {'/'});
             string key = tagId + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3];
@@ -82,7 +85,7 @@ namespace CFR
 
         public IList<string> DeclareOutputFields()
         {
-            return new List<string>() { "tagId", "dateTime", "page", "location" };
+            return new List<string>() { "tagId", "dateTime", "page", "location", "tenantName", "report", "completness" };
         }
 
         private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()
