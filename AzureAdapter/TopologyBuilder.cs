@@ -128,8 +128,16 @@ namespace AzureAdapter
             new ActorMetadata("ReportGroupCompletnessBolt", "CFRTopology")
                     {
                         IsSpout = false,
+                        SchemaGroupingMode = "FieldGrouping",
+                        GroupingField = "dateTime,location",
                         ParallelCount = 2,
                         Parent = "PageGroupBolt",
+                    },
+            new ActorMetadata("LocationGroupBolt", "CFRTopology")
+                    {
+                        IsSpout = false,
+                        ParallelCount = 2,
+                        Parent = "ReportGroupCompletnessBolt",
                     },
         };
         #endregion

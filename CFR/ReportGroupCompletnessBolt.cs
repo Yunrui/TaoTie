@@ -95,6 +95,13 @@ namespace CFR
 
                 } while (true);
             }
+
+            IList<string> strs = new List<string>()
+                {
+                   dateTime,
+                   location
+                };
+            this.emitter.Emit(new PrimitiveInterface.Tuple(strs));
         }
 
         public void Open(IEmitter emitter, TopologyContext context)
@@ -105,7 +112,7 @@ namespace CFR
 
         public IList<string> DeclareOutputFields()
         {
-            return new List<string>() { null };
+            return new List<string>() { "dateTime", "location" };
         }
     }
 
