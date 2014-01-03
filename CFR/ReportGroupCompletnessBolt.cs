@@ -44,9 +44,8 @@ namespace CFR
             string completness = tuple.Get(3) as string;
             string location = tuple.Get(4) as string;
 
-            string key = reportName + "_" + dateTime;
-
-            var parts = dateTime.Split(new char[] {'/'});
+            var parts = dateTime.Split(new char[] { '/' });
+            string key = reportName + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3];
 
             if (RequestCountCache.ContainsKey(key))
             {
@@ -73,7 +72,7 @@ namespace CFR
                         TotalCompletness = TotalCompletnessCache[k],
                         Completness = TotalCompletnessCache[k] / RequestCountCache[k],
                         Bolt = this.context.ActorId,
-                        RowKey = reportName + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3],
+                        RowKey = k,
                     };
 
                     TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
