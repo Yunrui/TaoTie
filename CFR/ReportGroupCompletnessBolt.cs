@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace CFR
 {
@@ -20,22 +21,23 @@ namespace CFR
         private Dictionary<string, double> TotalCompletnessCache = new Dictionary<string, double>(); 
 
         private CloudTable table;
+        private CloudQueue scrollQueue;
         private TopologyContext context;
+
+        private DateTime lastUpdateTime = DateTime.Now;
+
+        private Queue<PrimitiveInterface.Tuple> latestMessage = new Queue<PrimitiveInterface.Tuple>();
 
         public ReportGroupCompletnessBolt()
         {
-            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = GetStorageAccount();
-
-            // Create the table client.
-            Microsoft.WindowsAzure.Storage.Table.CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-
-            this.table = tableClient.GetTableReference("reportCompletness");
-
-            this.table.CreateIfNotExists();
+            this.table = StorageAccount.GetTable("reportCompletness");
+            this.scrollQueue = StorageAccount.GetQueue("latestaccess");
         }
 
         public void Execute(PrimitiveInterface.Tuple tuple)
         {
+            this.latestMessage.Enqueue(tuple);
+
             string dateTime = tuple.Get(0) as string;
             string tenantName = tuple.Get(1) as string;
             string reportName = tuple.Get(2) as string;
@@ -57,22 +59,41 @@ namespace CFR
                 TotalCompletnessCache[key] = double.Parse(completness);
             }
 
-            // Not necessary to update database for each entry
-            // Todo update flaged data each 15 seconds, and clear dirty data
-            if (RequestCountCache[key] % 50 == 0)
+            if ((DateTime.Now - this.lastUpdateTime).TotalSeconds > 3)
             {
-                ReportCompletnessEntry entity = new ReportCompletnessEntry()
-                {
-                    Name = key,
-                    RequestCount = RequestCountCache[key],
-                    TotalCompletness = TotalCompletnessCache[key],
-                    Completness = TotalCompletnessCache[key] / RequestCountCache[key],
-                    Bolt = this.context.ActorId,
-                    RowKey = reportName + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3],
-                };
+                this.lastUpdateTime = DateTime.Now;
 
-                TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
-                table.Execute(insertOperation);
+                // Update completeness table
+                foreach (string k in this.RequestCountCache.Keys)
+                {
+                    ReportCompletnessEntry entity = new ReportCompletnessEntry()
+                    {
+                        Name = k,
+                        RequestCount = RequestCountCache[k],
+                        TotalCompletness = TotalCompletnessCache[k],
+                        Completness = TotalCompletnessCache[k] / RequestCountCache[k],
+                        Bolt = this.context.ActorId,
+                        RowKey = reportName + "_" + parts[0] + "_" + parts[1] + "_" + parts[2] + "_" + parts[3],
+                    };
+
+                    TableOperation insertOperation = TableOperation.InsertOrReplace(entity);
+                    table.Execute(insertOperation);
+                }
+
+                // Update latest access queue
+                int i = 0; 
+                do
+                {
+                    if (this.latestMessage.Count == 0 || i++ > 10)
+                    {
+                        break;
+                    }
+
+                    var t = this.latestMessage.Dequeue();
+                    var str = string.Format("{0}___{1}", t.Get(1), t.Get(2));
+                    this.scrollQueue.AddMessage(new CloudQueueMessage(str));
+
+                } while (true);
             }
         }
 
@@ -86,25 +107,7 @@ namespace CFR
         {
             return new List<string>() { null };
         }
-
-        private static Microsoft.WindowsAzure.Storage.CloudStorageAccount GetStorageAccount()
-        {
-            Microsoft.WindowsAzure.Storage.CloudStorageAccount storageAccount = null;
-
-            if (RoleEnvironment.IsEmulated)
-            {
-                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.DevelopmentStorageAccount;
-            }
-            else
-            {
-                // Retrieve the storage account from the connection string.
-                storageAccount = Microsoft.WindowsAzure.Storage.CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"));
-            }
-            return storageAccount;
-        }
     }
-
-
 
     /// <summary>
     /// ActorEntity

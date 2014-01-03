@@ -74,7 +74,7 @@ namespace CFR
                 localCache[key] = 1;
             }
 
-            if ((DateTime.Now - this.lastUpdateTime).TotalSeconds > 15)
+            if ((DateTime.Now - this.lastUpdateTime).TotalSeconds > 3)
             {
                 this.lastUpdateTime = DateTime.Now;
 
