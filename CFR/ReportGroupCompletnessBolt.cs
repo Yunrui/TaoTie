@@ -95,6 +95,9 @@ namespace CFR
                 } while (true);
             }
 
+            var partsdate = dateTime.Split(new char[] { '/' });
+            dateTime = partsdate[0] + "/" + partsdate[1] + "/" + partsdate[2];
+
             IList<string> strs = new List<string>()
                 {
                    dateTime,
