@@ -68,12 +68,6 @@
     <Content Include="TaskContent\CFR.pdb">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="TaskContent\DQCompletness.dll">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="TaskContent\WordCountTopology.dll">
-      <SubType>Content</SubType>
-    </Content>
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
